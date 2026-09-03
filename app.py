@@ -8,68 +8,69 @@ import requests
 st.set_page_config(
     page_title="Trash to Treasure PK", 
     page_icon="💎", 
-    layout="centered"
+    layout="wide" # Set layout to wide to allow beautiful side-by-side elements
 )
 
-# Apply colorful styling patches across core phone elements
+# Custom color injections for widgets and backgrounds
 st.markdown("""
     <style>
-    .main { background-color: #f9fbfd; }
-    div[data-testid="stMetricValue"] { color: #1e88e5; font-weight: bold; }
-    .badge-box { background-color: #e3f2fd; border-radius: 12px; padding: 15px; border-left: 6px solid #1e88e5; margin-bottom: 12px; }
-    .game-box { background-color: #e8f5e9; border-radius: 12px; padding: 15px; border-left: 6px solid #4caf50; margin-bottom: 12px; }
+    .main { background-color: #f4f7f6; }
+    div[data-testid="stMetricValue"] { color: #2e7d32; font-weight: bold; }
+    .badge-box { background-color: #ffffff; border-radius: 14px; padding: 20px; border-left: 6px solid #2e7d32; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+    .title-banner { background: linear-gradient(135deg, #1b5e20, #4caf50); padding: 20px; border-radius: 12px; color: white; margin-bottom: 25px; text-align: center; }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("💎 Trash to Treasure PK")
-st.markdown("### **اسمارٹ کباڑ اور گھر کی بچت**")
-st.write("Turn your household waste into savings. Scan items, earn points, and alert local dealers.")
-st.divider()
+# App branding banner
+st.markdown("""
+    <div class="title-banner">
+        <h1>💎 TRASH TO TREASURE PK</h1>
+        <p><b>اسمارٹ کباڑ اور گھر کی بچت</b></p>
+    </div>
+""", unsafe_allow_html=True)
+
+# Split screen into columns: Left for data input, Right for branding illustration and garden stats
+left_col, right_col = st.columns([2, 1])
 
 # ==========================================
-# 🎮 2. GAMIFICATION & FAMILY PROFILES
+# 🎮 2. DYNAMIC STATE LEDGER & DATA TRACKING
 # ==========================================
-st.sidebar.header("🏆 Ghar Ki Deewar")
-
-# Persistent state trackers across mobile operations
 if 'history' not in st.session_state: st.session_state.history = []
-if 'scores' not in st.session_state:
-    st.session_state.scores = {"Ammi 👩": 150, "Aisha 👧": 200, "Ali 👦": 50, "Abbu 👨": 0}
+if 'scores' not in st.session_state: st.session_state.scores = {}
 
-# Dropdown allowing different members to claim their sorting actions
-active_member = st.sidebar.selectbox("👤 Select Family Member:", list(st.session_state.scores.keys()))
-
-st.sidebar.subheader("🏅 Current Leaderboard")
-for member, points in sorted(st.session_state.scores.items(), key=lambda x: x[1], reverse=True):
-    st.sidebar.write(f"**{member}**: {points} ⭐")
-
-# Dynamic Visual Garden progression
-total_points_logged = sum(st.session_state.scores.values())
-st.sidebar.subheader("🌱 Family Garden")
-if total_points_logged < 200:
-    st.sidebar.success("🪵 Status: Sprout (ننھا پودا) - Keep sorting to grow!")
-elif total_points_logged < 500:
-    st.sidebar.success("🌿 Status: Growing Bush (بڑا پودا)")
-else:
-    st.sidebar.success("🌳 Status: Mature Jasmine Tree (چمبیلی کا درخت)!")
+with left_col:
+    st.subheader("📸 AI Intelligent Sorting Camera")
+    
+    # Custom profile creation field
+    new_member = st.text_input("➕ Add a New Family Member Profile Name:", placeholder="Type name (e.g., Ali, Aisha, Ammi)...")
+    if st.button("Create Profile") and new_member:
+        if new_member not in st.session_state.scores:
+            st.session_state.scores[new_member] = 0
+            st.toast(f"Profile for {new_member} created successfully! 🎉")
+    
+    # Active member tracker
+    if st.session_state.scores:
+        active_member = st.selectbox("👤 Select Active Profile to Log Points:", list(st.session_state.scores.keys()))
+    else:
+        st.warning("Please add at least one profile name above to begin logging points.")
+        active_member = None
 
 # ==========================================
-# 📦 3. REGIONAL DATA & KABARI RATES
+# 📦 3. REGIONAL KABARI STATIONS
 # ==========================================
 DEALERS = [
     {"name": "Kabar Shop (Kundian)", "phone": "923017800615", "loc": "Garnely Road, Kundian", "items": "Plastics, Paper, Metal Tins"},
-    {"name": "Darhal Scrap Yard", "phone": "923327656648", "loc": "Chashma Road, Khanqah Sirajia", "items": "Cartons, Fabric Clothes, Stashes"},
-    {"name": "Shah G Scrap Dealers", "phone": "923706000509", "loc": "Eid Gah Road, Mianwali", "items": "Bulk Plastics, Metals, Furniture Stuffing"},
-    {"name": "Local Razaee/Gada Maker", "phone": "923046330986", "loc": "Kundian Market Link", "items": "Torn Fabric Clothes, Old Bedsheets"}
+    {"name": "Darhal Scrap Yard", "phone": "923327656648", "loc": "Chashma Road, Khanqah Sirajia", "items": "Cartons, Fabric Clothes, Mixed Stashes"},
+    {"name": "Shah G Scrap Dealers", "phone": "923706000509", "loc": "Eid Gah Road, Mianwali", "items": "Bulk Plastics, Metals, Appliances Stuffing"},
+    {"name": "Local Razaee/Gada Maker", "phone": "923046330986", "loc": "Kundian Market Link", "items": "Torn Fabric Clothes, Old Sheets"}
 ]
 
 # ==========================================
-# 🧠 4. AI IMAGE PROFILING ENGINE
+# 🧠 4. CLOUD INTERFERENCE PATTERNS
 # ==========================================
 def analyze_image_with_ai(uploaded_file):
     image_bytes = uploaded_file.getvalue()
     API_URL = "https://huggingface.co"
-    
     try:
         response = requests.post(API_URL, data=image_bytes, timeout=10)
         results = response.json()
@@ -80,84 +81,97 @@ def analyze_image_with_ai(uploaded_file):
         elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask']):
             return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.5, "🍾 Wash, crush, and keep inside the Bachat Bag."
         elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket']):
-            return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 2.0, "🧵 Bundle for mattress filling or industrial wipers."
+            return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 2.0, "🧵 Save for mattress filling or industrial wipers."
         elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee']):
-            return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 1.0, "🌱 Add to plants as home fertilizer. Zero badboo!"
+            return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 1.0, "🌱 Add to plants as fertilizer. Zero badboo!"
         else:
-            return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose of tightly sealed via the daily tractor."
+            return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
     except Exception:
-        # Secure baseline fallback
         return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
 
-# --- UI INTERACTIVE WORKFLOW ---
-img_file = st.camera_input("📸 Scan an item using your phone camera")
+# --- MAIN INGESTION INTERACTION ---
+with left_col:
+    img_file = st.camera_input("Take a photo of a trash item")
+    if img_file:
+        st.image(img_file, width=300)
+        st.info("🔄 Running neural image classification matrix...")
+        
+        cat, rate, weight, household_tip = analyze_image_with_ai(img_file)
+        
+        st.markdown(f"""
+        <div class="badge-box">
+            <h4 style="color:#1b5e20;">🤖 AI Detection Result</h4>
+            <p>Category: <b>{cat}</b></p>
+            <p style="color:#555;"><i>{household_tip}</i></p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        value = rate * weight
+        if value > 0:
+            st.metric(label="Scrap Market Value Forecast", value=f"Rs. {value:.1f}")
+        
+        if st.button("➕ Accumulate to Profile Scores") and active_member:
+            st.session_state.scores[active_member] += 50
+            st.session_state.history.append({
+                "Member": active_member, "Category": cat, "Weight": weight, "Cash Value": value
+            })
+            st.toast("Progress saved successfully! 🏆")
+            st.rerun()
 
-if img_file:
-    st.image(img_file, width=240)
-    st.info("🔄 Processing image through AI vision loop...")
+# --- SIDE PANEL STYLING & ILLUSTRATION WORKSHOP ---
+with right_col:
+    st.write("### 🏠 Eco-Family Hub")
     
-    cat, rate, weight, household_tip = analyze_image_with_ai(img_file)
-    
-    # Showcase results in the clean color layouts
-    st.markdown(f"""
-    <div class="badge-box">
-        <h4>🤖 AI Scan Result</h4>
-        <p>Category: <b>{cat}</b></p>
-        <p><i>{household_tip}</i></p>
-    </div>
+    # Animated styling representation fallback via Markdown vectors
+    st.markdown("""
+        <div style="background-color:#e8f5e9; padding:20px; border-radius:12px; text-align:center; border:2px dashed #4caf50;">
+            <p style="font-size:45px; margin:0;">👨‍👩‍👧‍👦♻️📦</p>
+            <b style="color:#2e7d32;">Trash To Treasure</b>
+            <p style="font-size:12px; color:#666; margin:5px 0 0 0;">Families sorting out recyclables together at home to maximize bachat yields!</p>
+        </div>
     """, unsafe_allow_html=True)
     
-    value = rate * weight
-    if value > 0:
-        st.metric(label="Estimated Value Tracked", value=f"Rs. {value:.1f}")
-    
-    if st.button(f"➕ Log Item for {active_member}"):
-        st.session_state.scores[active_member] += 50
-        st.session_state.history.append({
-            "Member": active_member, "Category": cat, "Weight": weight, "Cash Value": value
-        })
-        st.toast(f"Points updated for {active_member}! 🎉")
-        st.rerun()
+    # Real-time leaderboard monitoring
+    st.write("#### 🏅 Live Point Leaderboard")
+    if st.session_state.scores:
+        for member, score in sorted(st.session_state.scores.items(), key=lambda x: x[1], reverse=True):
+            st.write(f"⭐ **{member}**: {score} Points")
+    else:
+        st.caption("No profiles registered yet.")
+        
+    # Plant growth metrics
+    total_points = sum(st.session_state.scores.values())
+    st.write("#### 🌿 Digital Backyard Growth")
+    if total_points < 150:
+        st.caption("🌱 Current Status: Tiny Seedling (ننھا پودا)")
+    elif total_points < 400:
+        st.success("🌿 Current Status: Growing Shrub (بڑا پودا)")
+    else:
+        st.success("🌳 Current Status: Blooming Jasmine Tree (چمبیلی کا درخت)!")
 
-# --- SUMMARY OVERVIEW ---
-st.subheader("📊 Household Ledger Status")
-df_history = pd.DataFrame(st.session_state.history)
-
-if not df_history.empty:
-    total_w = df_history["Weight"].sum()
-    total_c = df_history["Cash Value"].sum()
-    
-    c1, c2 = st.columns(2)
-    c1.metric("Total Weight Saved", f"{total_w:.1f} kg")
-    c2.metric("Total Estimated Income", f"Rs. {total_c:.1f}")
-    
-    st.write("#### 📝 Sorting Logs")
-    st.dataframe(df_history, use_container_width=True)
-else:
-    st.info("No logs added today yet. Scan an object above to kick off your stats chart.")
-
-# --- THE WHATSAPP DISPATCH GATEWAY ---
+# --- LEDGER SHEET OUTPUTS ---
 st.divider()
-st.subheader("📍 Nearby Dealers & Doorstep Pickup")
-selected_dealer = st.selectbox("Choose a dealer near you:", [d["name"] for d in DEALERS])
+df_history = pd.DataFrame(st.session_state.history)
+if not df_history.empty:
+    st.subheader("📊 Collective Household Balance Sheet")
+    c1, c2 = st.columns(2)
+    c1.metric("Gross Weight Saved", f"{df_history['Weight'].sum():.1f} kg")
+    c2.metric("Gross Revenue Tracked", f"Rs. {df_history['Cash Value'].sum():.1f}")
+    st.dataframe(df_history, use_container_width=True)
+
+# --- COMPLETELY RE-ENGINEERED COMPLIANT WHATSAPP DISPATCH MODULE ---
+st.subheader("📍 Dispatches to Local Chashma/Kundian Yards")
+selected_dealer = st.selectbox("Select local scrap yard merchant:", [d["name"] for d in DEALERS])
 dealer_info = next(d for d in DEALERS if d["name"] == selected_dealer)
 
-st.write(f"🗺️ **Location:** {dealer_info['loc']}")
-st.write(f"📦 **Accepts Materials:** {dealer_info['items']}")
+st.write(f"📍 **Address:** {dealer_info['loc']} | 📦 **Buying Specializations:** {dealer_info['items']}")
 
-# Build clear text parameters
-whatsapp_msg = (
-    f"Assalam-o-Alaikum, I have collected sorted household scrap near Chashma. "
-    f"Please let me know when your rider can pass by to pick it up."
-)
+# Using optimized URL encoding to prevent script injection failure on mobile web-views
+raw_text_payload = "Assalam-o-Alaikum, I have sorted household recycling packages ready near Chashma. Please confirm pickup window."
+clean_url_parameters = requests.utils.quote(raw_text_payload)
 
-# Convert strings safely to prevent web standard link breakdown
-encoded_msg = requests.utils.quote(whatsapp_msg)
-wa_native_url = f"https://wa.me{dealer_info['phone']}?text={encoded_msg}"
+# Cleaned syntax directly invoking internal deep-linking protocols
+final_wa_url = f"https://whatsapp.com{dealer_info['phone']}&text={clean_url_parameters}"
 
-# Standard markdown links can break on mobile viewports. Native buttons fix this completely:
-st.link_button("💬 Send Pickup Request via WhatsApp", wa_native_url, type="primary")
-
-
-
-   
+# Native interactive element block completely bypassing standard markdown parsing bugs
+st.link_button("💬 Launch WhatsApp Mobile Dispatch", final_wa_url, type="primary", use_container_width=True)
