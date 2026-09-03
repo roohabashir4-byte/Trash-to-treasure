@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 # ==========================================
-# 🎨 1. GLOBAL THEME DESIGN & BRANDING CONFIGURATION
+# 🎨 1. THEME DESIGN & BRANDING CONFIGURATION
 # ==========================================
 st.set_page_config(
     page_title="Trash to Treasure PK", 
@@ -55,7 +55,7 @@ household_code = st.sidebar.text_input("Enter Household Code (گھر کا کوڈ
 current_cash_total = 0.0
 
 if not household_code:
-    st.warning("👋 Welcome! Please type a unique **Household Code** in the sidebar to load your private, customized space.")
+    st.warning("👋 Welcome! Please type a unique Household Code in the sidebar to load your private, customized space.")
     st.info("💡 *Tip: You can invent any code you want (like your name or house number). Just remember it so your family can log back in later!*")
 else:
     if household_code not in st.session_state.global_db:
