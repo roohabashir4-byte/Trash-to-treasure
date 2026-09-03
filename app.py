@@ -33,34 +33,29 @@ st.markdown("""
 # ==========================================
 # 🔑 2. DATA ISOLATION ENGINE (GHAR KA CODE)
 # ==========================================
-# Initialize a global mock database dictionary if it doesn't exist
 if 'global_db' not in st.session_state:
     st.session_state.global_db = {}
 
 st.sidebar.header("🔑 Household Access")
 st.sidebar.write("Create or enter a unique code for your house to keep your profile private.")
 
-# Unique code input field
 household_code = st.sidebar.text_input("Enter Household Code (گھر کا کوڈ):", placeholder="e.g., khan-house-chashma").strip().lower()
 
 if not household_code:
     st.warning("👋 Welcome! Please type a unique **Household Code** in the sidebar to load your private, customized space.")
     st.info("💡 *Tip: You can invent any code you want (like your name or house number). Just remember it so your family can log back in later!*")
 else:
-    # If the household code doesn't exist in our global dictionary, create a clean slate for it
     if household_code not in st.session_state.global_db:
         st.session_state.global_db[household_code] = {
-            "scores": {},      # Completely empty dynamic profile list
-            "history": []       # Completely empty personal data logs
+            "scores": {},      
+            "history": []       
         }
         st.sidebar.success(f"🆕 New private space initialized for code: **{household_code}**!")
     else:
         st.sidebar.success(f"🔓 Private space unlocked for: **{household_code}**")
 
-    # Fetch ONLY this specific household's data from our global container
     my_house = st.session_state.global_db[household_code]
 
-    # Split workspace layout into side-by-side active sections
     left_col, right_col = st.columns(2)
 
     # ==========================================
@@ -78,7 +73,6 @@ else:
                 st.toast(f"Profile for '{clean_name}' created in your house! 🎉")
                 st.rerun()
         
-        # Profile picker linked strictly to this private household dictionary
         if my_house["scores"]:
             active_member = st.selectbox("Select who is scanning this item:", list(my_house["scores"].keys()))
         else:
@@ -160,7 +154,6 @@ else:
     # 🎨 6. SIDE PANEL ILLUSTRATION & GARDEN STATS
     # ==========================================
     with right_col:
-        # 🖼️ VISUAL FAMILY BANNER CARD
         st.markdown("""
             <div class="illustration-box">
                 <p style="font-size:60px; margin:0; padding:0;">👨‍👩‍👧‍👦♻️📦</p>
@@ -174,9 +167,8 @@ else:
         st.write("### 🏆 Ghar Ki Deewar")
         st.write("#### **Your Family Leaderboard**")
         
-        # Display names entered STRICTLY by this specific code profile
         if my_house["scores"]:
-            for member, score in sorted(my_house["scores"].items(), key=lambda x: x[1], reverse=True):
+            for member, score in sorted(my_house["scores"].items(), key=lambda x: x, reverse=True):
                 st.markdown(f"⭐ **{member}** : `{score} Points`")
         else:
             st.info("Your leaderboard is empty. Add your family profiles above!")
@@ -184,3 +176,17 @@ else:
         total_points = sum(my_house["scores"].values())
         st.write("#### **🌱 Family Digital Garden**")
         if total_points == 0:
+            st.caption("🪴 Status: Dry Soil - Awaiting your first sorted item logs!")
+        elif total_points < 200:
+            st.success("🌱 Status: Tiny Seedling (ننھا پودا) - Good start!")
+        elif total_points < 500:
+            st.success("🌿 Status: Growing Shrub (بڑا پودا) - Garden is growing!")
+        else:
+            st.success("🌳 Status: Blooming Jasmine Tree (چمبیلی کا درخت) - Ultimate Saliqa achieved!")
+
+    # ==========================================
+    # 📊 7. INDIVIDUAL HOUSEHOLD LEDGER SHEET
+    # ==========================================
+    st.divider()
+    df_history = pd.DataFrame(my_house["history"])
+    if not df_history.empty:
