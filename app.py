@@ -103,7 +103,6 @@ else:
             results = response.json()
             
             top_prediction = ""
-            # Completely fixed dictionary parsing layout array tracking
             if isinstance(results, list) and len(results) > 0:
                 first_item = results[0]
                 if isinstance(first_item, dict) and 'label' in first_item:
@@ -185,3 +184,6 @@ else:
         elif total_points < 500:
             st.success("🌿 Status: Growing Shrub (بڑا پودا) - Garden is growing!")
         else:
+            st.success("🌳 Status: Blooming Jasmine Tree (چمبیلی کا درخت) - Ultimate Saliqa achieved!")
+
+    # ==========================================
