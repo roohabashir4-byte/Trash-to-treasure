@@ -31,7 +31,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🔑 2. DATA ISOLATION ENGINE (GHAR KA CODE)
+# 📦 2. REGIONAL KABARI YARD DATA (ALWAYS ACCESSIBLE)
+# ==========================================
+DEALERS = [
+    {"name": "Kabar Shop (Kundian)", "phone": "923017800615", "loc": "Garnely Road, Kundian", "items": "Plastics, Paper, Metal Tins"},
+    {"name": "Darhal Scrap Yard", "phone": "923327656648", "loc": "Chashma Road, Khanqah Sirajia", "items": "Cartons, Fabric Clothes, Mixed Stashes"},
+    {"name": "Shah G Scrap Dealers", "phone": "923706000509", "loc": "Eid Gah Road, Mianwali", "items": "Bulk Plastics, Metals, Appliances Stuffing"},
+    {"name": "Local Razaee/Gada Maker", "phone": "923046330986", "loc": "Kundian Market Link", "items": "Torn Fabric Clothes, Old Sheets"}
+]
+
+# ==========================================
+# 🔑 3. DATA ISOLATION ENGINE (GHAR KA CODE)
 # ==========================================
 if 'global_db' not in st.session_state:
     st.session_state.global_db = {}
@@ -40,6 +50,9 @@ st.sidebar.header("🔑 Household Access")
 st.sidebar.write("Create or enter a unique code for your house to keep your profile private.")
 
 household_code = st.sidebar.text_input("Enter Household Code (گھر کا کوڈ):", placeholder="e.g., khan-house-chashma").strip().lower()
+
+# Initialize variable flags to maintain visibility flow
+current_cash_total = 0.0
 
 if not household_code:
     st.warning("👋 Welcome! Please type a unique **Household Code** in the sidebar to load your private, customized space.")
@@ -58,7 +71,7 @@ else:
     left_col, right_col = st.columns(2)
 
     # ==========================================
-    # 🎮 3. DYNAMIC PROFILE WORKSPACE
+    # 🎮 4. DYNAMIC PROFILE WORKSPACE
     # ==========================================
     with left_col:
         st.write("### 📸 AI Intelligent Waste Scanner")
@@ -79,17 +92,7 @@ else:
             active_member = None
 
     # ==========================================
-    # 📦 4. REGIONAL KABARI YARD DATA
-    # ==========================================
-    DEALERS = [
-        {"name": "Kabar Shop (Kundian)", "phone": "923017800615", "loc": "Garnely Road, Kundian", "items": "Plastics, Paper, Metal Tins"},
-        {"name": "Darhal Scrap Yard", "phone": "923327656648", "loc": "Chashma Road, Khanqah Sirajia", "items": "Cartons, Fabric Clothes, Mixed Stashes"},
-        {"name": "Shah G Scrap Dealers", "phone": "923706000509", "loc": "Eid Gah Road, Mianwali", "items": "Bulk Plastics, Metals, Appliances Stuffing"},
-        {"name": "Local Razaee/Gada Maker", "phone": "923046330986", "loc": "Kundian Market Link", "items": "Torn Fabric Clothes, Old Sheets"}
-    ]
-
-    # ==========================================
-    # 🧠 5. DEEP ANALYSIS IMAGE ENGINE (FIXED DATA PARSING)
+    # 🧠 5. DEEP ANALYSIS IMAGE ENGINE (FIXED INDEX HANDLING)
     # ==========================================
     def analyze_image_with_ai(uploaded_file):
         image_bytes = uploaded_file.getvalue()
@@ -100,7 +103,6 @@ else:
             results = response.json()
             
             top_prediction = ""
-            # Safely navigate dictionary elements inside data frames
             if isinstance(results, list) and len(results) > 0:
                 first_item = results[0]
                 if isinstance(first_item, dict) and 'label' in first_item:
@@ -111,22 +113,16 @@ else:
             if not top_prediction:
                 top_prediction = "unknown"
 
-            # Segment keywords for accurate classification
             if any(w in top_prediction for w in ['paper', 'newspaper', 'book', 'magazine', 'carton', 'cardboard', 'envelope', 'notebook', 'packet']):
                 return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
-                
             elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass', 'sprite', 'soda', 'pop', 'vessel']):
                 return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Wash, crush, and keep inside the Bachat Bag."
-                
-            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton']):
+            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel']):
                 return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 1.0, "🧵 Save for mattress filling or industrial wipers."
-                
             elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste', 'garbage', 'scraps']):
                 return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
-                
             else:
                 return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
-                
         except Exception:
             return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
 
@@ -188,3 +184,4 @@ else:
             st.caption("🪴 Status: Dry Soil - Awaiting your first sorted item logs!")
         elif total_points < 200:
             st.success("🌱 Status: Tiny Seedling (ننھا پودا) - Good start!")
+        elif total_points < 500:
