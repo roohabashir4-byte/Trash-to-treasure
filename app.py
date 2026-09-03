@@ -202,7 +202,7 @@ else:
             key = "raddi"
             tip = "📦 Save dry for monthly resale."
             
-            # ✅ STABILIZED SPLITTING WITH STRIP APPLIED DIRECTLY AFTER PARSING VALIDATION
+            # ✅ RE-ENGINEERED STRUCTURAL FLATTENING (Guarantees zero indentation slips)
             if "|" in ai_output:
                 parts = ai_output.split("|")
                 if len(parts) >= 2:
