@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import requests
+from bs4 import BeautifulSoup
+from PIL import Image
+import google.generativeai as genai
 
 # ==========================================
 # 🎨 1. THEME DESIGN & BRANDING CONFIGURATION
@@ -11,7 +14,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Apply beautiful CSS styling accents across widgets and blocks at the absolute top layer
+# Advanced CSS injects handling theme layouts, flashing alerts, and custom visual cards
 st.markdown("""
     <style>
     .main { background-color: #f4f7f6; }
@@ -19,10 +22,35 @@ st.markdown("""
     .badge-box { background-color: #ffffff; border-radius: 14px; padding: 20px; border-left: 6px solid #2e7d32; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
     .title-banner { background: linear-gradient(135deg, #1b5e20, #4caf50); padding: 25px; border-radius: 12px; color: white; margin-bottom: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .illustration-box { background-color: #e8f5e9; padding: 20px; border-radius: 12px; text-align: center; border: 2px dashed #4caf50; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    
+    @keyframes pulse-green {
+        0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+    .price-flash-green {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 5px solid #4caf50;
+        font-weight: bold;
+        text-align: center;
+        animation: pulse-green 2s infinite;
+        margin-bottom: 15px;
+    }
+    .sidebar-rate-text {
+        font-size: 14px;
+        margin: 5px 0;
+        padding: 6px;
+        background-color: #ffffff;
+        border-radius: 6px;
+        border: 1px solid #eee;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# 🌍 BRANDING BANNER LOGO & VISUAL ILLUSTRATION BANNER
+# 🌍 BRANDING BANNER LOGO
 st.markdown("""
     <div class="title-banner">
         <h1 style="margin:0; font-size:38px;">💎 TRASH TO TREASURE PK</h1>
@@ -41,54 +69,83 @@ DEALERS = [
 ]
 
 # ==========================================
-# 🧠 3. GLOBAL DEEP ANALYSIS IMAGE CLASSIFICATION ENGINE (PULLED TO TOP)
+# 📈 3. LIVE WEBSCRAPER & CACHE PROTECTION (://getscraprate.com)
 # ==========================================
-def analyze_image_with_ai(uploaded_file):
-    image_bytes = uploaded_file.getvalue()
-    API_URL = "https://huggingface.co"
-    
+@st.cache_data(ttl=3600)  
+def fetch_live_pakistan_rates():
+    url = "https://://getscraprate.com"
+    defaults = {"plastic": 62.25, "raddi": 43.51, "cardboard": 30.98, "textile": 35.00}
     try:
-        response = requests.post(API_URL, data=image_bytes, timeout=10)
-        results = response.json()
-        
-        top_prediction = ""
-        # ✅ FIXED: Explicitly checks and grabs index 0 of the list array safely
-        if isinstance(results, list) and len(results) > 0:
-            first_item = results[0]
-            if isinstance(first_item, dict) and 'label' in first_item:
-                top_prediction = first_item['label'].lower()
-        elif isinstance(results, dict) and 'label' in results:
-            top_prediction = results['label'].lower()
+        req = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+        if req.status_code == 200:
+            soup = BeautifulSoup(req.text, 'html.parser')
+            text_data = soup.get_text().lower()
             
-        if not top_prediction:
-            top_prediction = "unknown"
-
-        if any(w in top_prediction for w in ['paper', 'newspaper', 'book', 'magazine', 'carton', 'cardboard', 'envelope', 'notebook', 'packet']):
-            return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
-        elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass', 'sprite', 'soda', 'pop', 'vessel']):
-            return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Wash, crush, and keep inside the Bachat Bag."
-        elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel', 'handkerchief']):
-            return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 1.0, "🧵 Save for mattress filling or industrial wipers."
-        elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste', 'garbage', 'scraps']):
-            return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
-        else:
-            return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
+            def extract_rate(item_name, default_val):
+                if item_name in text_data:
+                    parts = text_data.split(item_name)
+                    for part in parts[1:]:
+                        words = part.split()
+                        for word in words:
+                            clean_word = "".join(c for c in word if c.isdigit() or c == '.')
+                            if clean_word:
+                                try:
+                                    val = float(clean_word)
+                                    if 10 < val < 200: return val
+                                except ValueError: continue
+                return default_val
+            
+            return {
+                "plastic": extract_rate("plastic", defaults["plastic"]),
+                "raddi": extract_rate("newspaper", defaults["raddi"]),
+                "cardboard": extract_rate("cardboard", defaults["cardboard"]),
+                "textile": defaults["textile"]
+            }
     except Exception:
-        return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
+        pass
+    return defaults
+
+LIVE_RATES = fetch_live_pakistan_rates()
 
 # ==========================================
-# 🔑 4. DATA ISOLATION ENGINE (GHAR KA CODE)
+# 🔑 4. SIDEBAR ACCESS, FLASHING ALERTS & LIVE MARKET TICKER
 # ==========================================
-if 'global_db' not in st.session_state:
-    st.session_state.global_db = {}
-
 st.sidebar.header("🔑 Household Access")
-st.sidebar.write("Create or enter a unique code for your house to keep your profile private.")
-
 household_code = st.sidebar.text_input("Enter Household Code (گھر کا کوڈ):", placeholder="e.g., khan-house-chashma").strip().lower()
 
-# Global placeholder for the baseline metrics scope
+# Render live sidebar rates ticker instantly below the access module
+st.sidebar.divider()
+st.sidebar.subheader("📈 Today's Punjab Bazar (لائیو ریٹ)")
+
+if LIVE_RATES["plastic"] >= 60.0 or LIVE_RATES["raddi"] >= 40.0:
+    st.sidebar.markdown("""
+        <div class="price-flash-green">
+            📈 Bazar Up: Good Time to Sell!<br><span style="font-size:12px; font-weight:normal;">(آج ریٹ تیز ہے - مال بیچیں)</span>
+        </div>
+    """, unsafe_allow_html=True)
+else:
+    st.sidebar.markdown("""
+        <div style="background-color:#fff3cd; color:#856404; padding:12px; border-radius:8px; border-left:5px solid #ffc107; font-weight:bold; text-align:center; margin-bottom:15px;">
+            ⚠️ Bazar Normal: Hold or Compare<br><span style="font-size:12px; font-weight:normal;">(مارکیٹ مستحکم ہے)</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+st.sidebar.markdown(f"""
+    <div class="sidebar-rate-text">🍾 <b>Plastics & Cans:</b> Rs. {LIVE_RATES['plastic']:.2f} / kg</div>
+    <div class="sidebar-rate-text">📦 <b>Raddi Newspaper:</b> Rs. {LIVE_RATES['raddi']:.2f} / kg</div>
+    <div class="sidebar-rate-text">🗂️ <b>Cardboard Box:</b> Rs. {LIVE_RATES['cardboard']:.2f} / kg</div>
+    <div class="sidebar-rate-text">🧵 <b>Fabric Clothes:</b> Rs. {LIVE_RATES['textile']:.2f} / kg</div>
+""", unsafe_allow_html=True)
+
+# 🔑 ADD GOOGLE GEMINI API KEY INPUT IN SIDEBAR TRAY Safely
+st.sidebar.divider()
+st.sidebar.subheader("🧠 Google AI Studio Configuration")
+gemini_api_key = st.sidebar.text_input("Enter Gemini API Key:", type="password", help="Get a free key from Google AI Studio website.")
+
 current_cash_total = 0.0
+
+if 'global_db' not in st.session_state:
+    st.session_state.global_db = {}
 
 if not household_code:
     st.warning("👋 Welcome! Please type a unique Household Code in the sidebar to load your private, customized space.")
@@ -99,7 +156,7 @@ else:
             "scores": {},      
             "history": []       
         }
-        st.sidebar.success(f"🆕 New private space initialized for code: **{household_code}**!")
+        st.sidebar.success(f"🆕 Private space created: **{household_code}**!")
     else:
         st.sidebar.success(f"🔓 Private space unlocked for: **{household_code}**")
 
@@ -107,13 +164,13 @@ else:
     left_col, right_col = st.columns(2)
 
     # ==========================================
-    # 🎮 5. DYNAMIC USER REGISTRATION HUB
+    # 🎮 5. USER REGISTRATION INTERFACE
     # ==========================================
     with left_col:
         st.write("### 📸 AI Intelligent Waste Scanner")
         st.markdown("#### **1. Register Family Members**")
         
-        new_member = st.text_input("Add a family member's name to your private space:", placeholder="Type name here (e.g., Ali, Aisha)...")
+        new_member = st.text_input("Add a family member's name:", placeholder="Type name here (e.g., Ali, Aisha)...")
         if st.button("✨ Register Member") and new_member:
             clean_name = new_member.strip()
             if clean_name and clean_name not in my_house["scores"]:
@@ -127,64 +184,25 @@ else:
             st.warning("⚠️ No profiles found in your house yet. Enter a family name above to unlock scanning features!")
             active_member = None
 
-    # --- IMAGE INGESTION WORKFLOW LOGIC ---
-    if active_member:
-        with left_col:
-            img_file = st.camera_input("📸 Take a photo of your trash item")
-            if img_file:
-                st.image(img_file, width=280)
-                st.info("🔄 Running neural image classification matrix...")
-                
-                cat, rate, weight, household_tip = analyze_image_with_ai(img_file)
-                
-                st.write(f"### 🤖 AI Detection Result")
-                st.write(f"Category: **{cat}**")
-                st.write(f"*{household_tip}*")
-                
-                value = rate * weight
-                st.metric(label="Scrap Market Value Forecast", value=f"Rs. {value:.1f}")
-                
-                if st.button(f"➕ Accumulate Items to {active_member}'s Stats"):
-                    my_house["scores"][active_member] += 50
-                    my_house["history"].append({
-                        "Member": active_member, "Category": cat, "Weight": weight, "Cash Value": value
-                    })
-                    st.toast(f"Points logged for {active_member}! 🏆")
-                    st.rerun()
-
     # ==========================================
-    # 🖼️ 6. SIDE PANEL ILLUSTRATION BANNER CARD & LEADERBOARD
+    # 🧠 6. ADVANCED GOOGLE GEMINI 1.5 FLASH ENGINE (COGNITIVE RESIDUAL)
     # ==========================================
-    with right_col:
-        st.markdown("""
-            <div class="illustration-box">
-                <p style="font-size:60px; margin:0; padding:0;">👨‍👩‍👧‍👦♻️📦</p>
-                <h4 style="color:#1b5e20; margin:10px 0 5px 0; font-size:20px;"><b>Ghar Ka Saliqa</b></h4>
-                <p style="font-size:13px; color:#555; margin:0; line-height:1.4;">
-                    Your isolated household data stack. Working together to keep your kitchen clean and collect bachat!
-                </p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.write("### 🏆 Ghar Ki Deewar")
-        st.write("#### **Your Family Leaderboard**")
-        
-        if my_house["scores"]:
-            for member, score in sorted(my_house["scores"].items(), key=lambda x: x, reverse=True):
-                st.markdown(f"⭐ **{member}** : `{score} Points`")
-        else:
-            st.info("Your leaderboard is empty. Add your family profiles above!")
+    def analyze_image_with_gemini(uploaded_file, api_key):
+        if not api_key:
+            return "Raddi & Cardboard (ردی اور گتہ)", LIVE_RATES["raddi"], 5.0, "⚠️ Please provide your free Gemini API Key in the sidebar to unlock real AI features!"
             
-        total_points = sum(my_house["scores"].values())
-        st.write("#### **🌱 Family Digital Garden**")
-        
-        if total_points == 0:
-            st.caption("🪴 Status: Dry Soil - Awaiting your first sorted item logs!")
-        elif total_points < 200:
-            st.success("🌱 Status: Tiny Seedling (ننھا پودا) - Good start!")
-        elif total_points < 500:
-            st.success("🌿 Status: Growing Shrub (بڑا پودا) - Garden is growing!")
-        else:
-            st.success("🌳 Status: Blooming Jasmine Tree (چمبیلی کا درخت) - Ultimate Saliqa achieved!")
-
-    # ==========================================
+        try:
+            # Configure Google generative AI client securely
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            # Read image buffer directly from camera state
+            img = Image.open(uploaded_file)
+            
+            # Formulate prompt engineering guidelines for Pakistani household streams
+            prompt = """
+            Look at this household waste item captured by a mobile camera in Pakistan. 
+            Classify it into exactly ONE of the following 5 specific categories based on what you see:
+            1. 'raddi' (if it is a book, newspaper, textbook, cardboard carton, delivery box, or paper package)
+            2. 'plastic' (if it is a plastic drink bottle, shampoo flask, metal tin container, soda can, or juice glass)
+            3. 'textile' (if it is torn clothing, old bedsheets, rags, unwearable garments, or waste cloth fabrics)
