@@ -96,7 +96,7 @@ else:
     # ==========================================
     def analyze_image_with_ai(uploaded_file):
         image_bytes = uploaded_file.getvalue()
-        API_URL = "https://huggingface.co"
+        API_URL = "https://api-inference.huggingface.co/models/microsoft/resnet-50"
         
         try:
             response = requests.post(API_URL, data=image_bytes, timeout=10)
@@ -173,7 +173,7 @@ else:
         st.write("#### **Your Family Leaderboard**")
         
         if my_house["scores"]:
-            for member, score in sorted(my_house["scores"].items(), key=lambda x: x, reverse=True):
+            for member, score in sorted(my_house["scores"].items(), key=lambda x: x[1], reverse=True):
                 st.markdown(f"⭐ **{member}** : `{score} Points`")
         else:
             st.info("Your leaderboard is empty. Add your family profiles above!")
