@@ -3,7 +3,9 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from PIL import Image
-import google.generativeai as genai
+from urllib.parse import quote
+from google import genai
+import base64
 
 
 # ==========================================
@@ -62,38 +64,19 @@ div[data-testid="stMetricValue"] {
     margin-bottom: 20px;
 }
 
-@keyframes pulse-green {
-
-    0% {
-        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-    }
-
-    70% {
-        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-    }
-
-}
-
-.price-flash-green {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    padding: 12px;
-    border-radius: 8px;
-    border-left: 5px solid #4caf50;
-    font-weight: bold;
-    text-align: center;
-    animation: pulse-green 2s infinite;
+.price-box {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    border-left: 6px solid #4caf50;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     margin-bottom: 15px;
 }
 
 .sidebar-rate-text {
     font-size: 14px;
     margin: 5px 0;
-    padding: 6px;
+    padding: 8px;
     background-color: #ffffff;
     border-radius: 6px;
     border: 1px solid #eee;
@@ -104,7 +87,7 @@ div[data-testid="stMetricValue"] {
 
 
 # ==========================================
-# 💎 3. BRANDING BANNER
+# 💎 3. BRANDING
 # ==========================================
 
 st.markdown("""
@@ -123,44 +106,39 @@ st.markdown("""
 
 
 # ==========================================
-# 📦 4. KABARI DEALERS
+# 📦 4. DEALERS
 # ==========================================
 
 DEALERS = [
-
     {
         "name": "Kabar Shop (Kundian)",
         "phone": "923017800615",
         "loc": "Garnely Road, Kundian",
         "items": "Plastics, Paper, Metal Tins"
     },
-
     {
         "name": "Darhal Scrap Yard",
         "phone": "923327656648",
         "loc": "Chashma Road, Khanqah Sirajia",
         "items": "Cartons, Fabric Clothes, Mixed Stashes"
     },
-
     {
         "name": "Shah G Scrap Dealers",
         "phone": "923706000509",
         "loc": "Eid Gah Road, Mianwali",
         "items": "Bulk Plastics, Metals, Appliances Stuffing"
     },
-
     {
         "name": "Local Razaee/Gada Maker",
         "phone": "923046330986",
         "loc": "Kundian Market Link",
         "items": "Torn Fabric Clothes, Old Sheets"
     }
-
 ]
 
 
 # ==========================================
-# 📈 5. LIVE SCRAP RATES
+# 📈 5. SCRAP RATES
 # ==========================================
 
 @st.cache_data(ttl=3600)
@@ -171,7 +149,7 @@ def fetch_live_pakistan_rates():
     defaults = {
         "plastic": 50.00,
         "raddi": 50.00,
-        "cardboard": 50.00,
+        "cardboard": 30.98,
         "textile": 35.00
     }
 
@@ -198,7 +176,9 @@ def fetch_live_pakistan_rates():
 
                 if item_name in text_data:
 
-                    parts = text_data.split(item_name)
+                    parts = text_data.split(
+                        item_name
+                    )
 
                     for part in parts[1:]:
 
@@ -215,7 +195,9 @@ def fetch_live_pakistan_rates():
 
                                 try:
 
-                                    val = float(clean_word)
+                                    val = float(
+                                        clean_word
+                                    )
 
                                     if 10 < val < 200:
                                         return val
@@ -226,24 +208,19 @@ def fetch_live_pakistan_rates():
                 return default_val
 
             return {
-
                 "plastic": extract_rate(
                     "plastic",
                     defaults["plastic"]
                 ),
-
                 "raddi": extract_rate(
                     "newspaper",
                     defaults["raddi"]
                 ),
-
                 "cardboard": extract_rate(
                     "cardboard",
                     defaults["cardboard"]
                 ),
-
                 "textile": defaults["textile"]
-
             }
 
     except Exception:
@@ -270,121 +247,54 @@ household_code = st.sidebar.text_input(
 st.sidebar.divider()
 
 st.sidebar.subheader(
-    "📈 Today's Punjab Bazar (لائیو ریٹ)"
+    "📈 Today's Punjab Bazar"
 )
 
 
-# ==========================================
-# 📈 MARKET ALERT
-# ==========================================
-
-if (
-    LIVE_RATES["plastic"] >= 60.0
-    or LIVE_RATES["raddi"] >= 40.0
-):
-
-    st.sidebar.markdown("""
-    <div class="price-flash-green">
-
-        📈 Bazar Up: Good Time to Sell!
-
-        <br>
-
-        <span style="font-size:12px; font-weight:normal;">
-            (آج ریٹ تیز ہے - مال بیچیں)
-        </span>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-else:
-
-    st.sidebar.markdown("""
-    <div style="
-        background-color:#fff3cd;
-        color:#856404;
-        padding:12px;
-        border-radius:8px;
-        border-left:5px solid #ffc107;
-        font-weight:bold;
-        text-align:center;
-        margin-bottom:15px;
-    ">
-
-        ⚠️ Bazar Normal: Hold or Compare
-
-        <br>
-
-        <span style="font-size:12px; font-weight:normal;">
-            (مارکیٹ مستحکم ہے)
-        </span>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ==========================================
-# 💰 DISPLAY RATES
-# ==========================================
-
 st.sidebar.markdown(f"""
-
 <div class="sidebar-rate-text">
-
-🍾 <b>Plastics & Cans:</b>
+🍾 <b>Plastic:</b>
 Rs. {LIVE_RATES['plastic']:.2f} / kg
-
 </div>
 
 <div class="sidebar-rate-text">
-
-📦 <b>Raddi Newspaper:</b>
+📦 <b>Raddi:</b>
 Rs. {LIVE_RATES['raddi']:.2f} / kg
-
 </div>
 
 <div class="sidebar-rate-text">
-
-🗂️ <b>Cardboard Box:</b>
+🗂️ <b>Cardboard:</b>
 Rs. {LIVE_RATES['cardboard']:.2f} / kg
-
 </div>
 
 <div class="sidebar-rate-text">
-
-🧵 <b>Fabric Clothes:</b>
+🧵 <b>Textile:</b>
 Rs. {LIVE_RATES['textile']:.2f} / kg
-
 </div>
-
 """, unsafe_allow_html=True)
 
 
 # ==========================================
-# 🔐 GEMINI API KEY FROM STREAMLIT SECRETS
+# 🔐 7. GEMINI SECRET
 # ==========================================
-
-st.sidebar.divider()
-
-st.sidebar.subheader(
-    "🧠 Google AI"
-)
 
 try:
 
-    gemini_api_key = st.secrets["GEMINI_API_KEY"]
+    gemini_api_key = st.secrets[
+        "GEMINI_API_KEY"
+    ]
 
 except Exception:
 
     gemini_api_key = ""
 
     st.sidebar.error(
-        "Gemini API key is missing from Secrets."
+        "Gemini API key is missing."
     )
 
 
 # ==========================================
-# 💾 SESSION DATABASE
+# 💾 8. SESSION DATABASE
 # ==========================================
 
 if "global_db" not in st.session_state:
@@ -398,47 +308,40 @@ if "last_result" not in st.session_state:
 
 
 # ==========================================
-# 🔐 HOUSEHOLD LOGIN
+# 🔐 9. HOUSEHOLD LOGIN
 # ==========================================
 
 if not household_code:
 
     st.warning(
-        "👋 Welcome! Please type a unique Household Code "
-        "in the sidebar to load your private, customized space."
+        "👋 Please enter your Household Code "
+        "in the sidebar to continue."
     )
 
     st.info(
-        "💡 Tip: You can invent any code you want "
-        "(like your name or house number). "
-        "Just remember it so your family can log back in later!"
+        "💡 You can create any unique code, "
+        "for example: khan-house-chashma"
     )
 
 else:
 
-    # ==========================================
-    # CREATE HOUSEHOLD
-    # ==========================================
-
     if household_code not in st.session_state.global_db:
 
-        st.session_state.global_db[household_code] = {
-
+        st.session_state.global_db[
+            household_code
+        ] = {
             "scores": {},
-
             "history": []
-
         }
 
         st.sidebar.success(
-            f"🆕 Private space created: **{household_code}**!"
+            "🆕 New private household created!"
         )
 
     else:
 
         st.sidebar.success(
-            f"🔓 Private space unlocked for: "
-            f"**{household_code}**"
+            "🔓 Household unlocked!"
         )
 
 
@@ -448,15 +351,11 @@ else:
 
 
     # ==========================================
-    # 📱 MAIN COLUMNS
+    # 👨‍👩‍👧 FAMILY MEMBER
     # ==========================================
 
     left_col, right_col = st.columns(2)
 
-
-    # ==========================================
-    # 👨‍👩‍👧 FAMILY MEMBERS
-    # ==========================================
 
     with left_col:
 
@@ -465,72 +364,69 @@ else:
         )
 
         st.markdown(
-            "#### **1. Register Family Members**"
+            "#### 1. Register Family Member"
         )
 
 
         new_member = st.text_input(
-            "Add a family member's name:",
-            placeholder="Type name here (e.g., Ali, Aisha)..."
+            "Family member name:",
+            placeholder="e.g. Ali"
         )
 
 
-        if st.button("✨ Register Member"):
+        if st.button(
+            "✨ Register Member"
+        ):
 
             if new_member:
 
-                clean_name = new_member.strip()
+                clean_name = (
+                    new_member.strip()
+                )
 
                 if (
                     clean_name
-                    and clean_name not in my_house["scores"]
+                    and clean_name
+                    not in my_house["scores"]
                 ):
 
-                    my_house["scores"][clean_name] = 0
+                    my_house[
+                        "scores"
+                    ][clean_name] = 0
 
-                    st.toast(
-                        f"Profile for '{clean_name}' "
-                        f"created successfully! 🎉"
+                    st.success(
+                        f"Profile created for {clean_name}!"
                     )
 
                     st.rerun()
-
-                else:
-
-                    st.warning(
-                        "This member already exists."
-                    )
 
 
         if my_house["scores"]:
 
             active_member = st.selectbox(
-                "Select who is scanning this item:",
-                list(my_house["scores"].keys())
+                "Who is scanning?",
+                list(
+                    my_house["scores"].keys()
+                )
             )
 
         else:
 
-            st.warning(
-                "⚠️ No profiles found in your house yet. "
-                "Enter a family name above to unlock scanning features!"
-            )
-
             active_member = None
+
+            st.warning(
+                "Register a family member first."
+            )
 
 
     # ==========================================
-    # 🧠 GEMINI AI FUNCTION
+    # 🤖 10. GEMINI ANALYSIS FUNCTION
     # ==========================================
 
     def analyze_image_with_gemini(
-        uploaded_file,
+        picture,
         api_key
     ):
-
-        # ------------------------------------------
-        # CHECK API KEY
-        # ------------------------------------------
 
         if not api_key:
 
@@ -538,66 +434,65 @@ else:
                 "error",
                 0.0,
                 0.0,
-                "⚠️ Gemini API key is missing. "
-                "Please add GEMINI_API_KEY in Streamlit Secrets."
+                "Gemini API key is missing."
             )
 
 
         try:
 
-            # --------------------------------------
-            # CONFIGURE GEMINI
-            # --------------------------------------
+            # ------------------------------
+            # CREATE GEMINI CLIENT
+            # ------------------------------
 
-            genai.configure(
+            client = genai.Client(
                 api_key=api_key
             )
 
 
-            # --------------------------------------
-            # USE GEMINI 2.5 FLASH
-            # --------------------------------------
+            # ------------------------------
+            # IMAGE DATA
+            # ------------------------------
 
-            model = genai.GenerativeModel(
-                "gemini-2.5-flash"
-            )
+            image_bytes = picture.getvalue()
 
+            image_b64 = base64.b64encode(
+                image_bytes
+            ).decode("utf-8")
 
-            # --------------------------------------
-            # OPEN IMAGE
-            # --------------------------------------
-
-            img = Image.open(
-                uploaded_file
-            )
+            mime_type = picture.type
 
 
-            # --------------------------------------
-            # STRONG CLASSIFICATION PROMPT
-            # --------------------------------------
+            # ------------------------------
+            # AI PROMPT
+            # ------------------------------
 
             prompt = """
 
-You are an expert waste classification AI.
+You are an expert waste classification assistant.
 
-Look carefully at the uploaded image.
+Look carefully at the photograph.
 
-Identify the MAIN waste item visible in the image.
+Identify the MAIN waste material.
 
-You MUST choose exactly ONE category.
+Choose exactly ONE category:
+
+plastic
+raddi
+textile
+kitchen
+landfill
 
 CATEGORY RULES:
 
 plastic =
 plastic bottles,
+PET bottles,
 plastic containers,
 plastic cups,
-plastic packaging,
-plastic cans,
-PET bottles.
+plastic packaging.
 
 raddi =
-newspapers,
+newspaper,
 books,
 paper,
 cardboard,
@@ -605,8 +500,6 @@ cartons.
 
 textile =
 clothes,
-shirts,
-pants,
 fabric,
 cloth,
 rags,
@@ -617,74 +510,131 @@ food,
 fruit peels,
 vegetable peels,
 tea leaves,
-food scraps,
 organic waste.
 
 landfill =
 diapers,
 dirty wrappers,
-non-recyclable waste,
-mixed garbage.
+non-recyclable garbage.
 
-IMPORTANT RULE:
+IMPORTANT:
 
-If you see a normal plastic drinking bottle,
-YOU MUST classify it as "plastic".
+A plastic drinking bottle MUST be classified as plastic.
 
-A plastic bottle is NEVER "raddi".
+Never classify a plastic bottle as raddi.
 
-Return ONLY this exact format:
+Also visually estimate the approximate weight of the visible material.
 
-category|tip
+IMPORTANT WEIGHT RULE:
+
+Weight from a photograph is ONLY a rough visual estimate.
+Do not pretend it is an exact measurement.
+
+Return ONLY this format:
+
+category|estimated_weight_kg|tip
 
 Examples:
 
-plastic|🧴 Plastic bottle ko saaf aur dry karke kabari ko dein.
+plastic|0.05|🧴 Plastic bottle ko saaf aur dry karke kabari ko dein.
 
-raddi|📦 Raddi ko dry rakh kar kabari ko dein.
+raddi|1.50|📦 Raddi ko dry rakh kar kabari ko dein.
 
-textile|👕 Purane kapray alag jama karein.
+textile|2.00|👕 Purane kapray alag jama karein.
 
-kitchen|🍌 Kitchen waste ko compost mein use karein.
+kitchen|0.50|🍌 Kitchen waste ko compost mein use karein.
 
-landfill|🗑️ Is waste ko general waste mein dispose karein.
+landfill|0.30|🗑️ Is waste ko general waste mein dispose karein.
 
-Do not return anything else.
+The estimated weight must be a number in kilograms.
+
+Do not write anything else.
 
 """
 
 
-            # --------------------------------------
-            # SEND IMAGE TO GEMINI
-            # --------------------------------------
+            # ------------------------------
+            # GEMINI REQUEST
+            # ------------------------------
 
-            response = model.generate_content(
-                [
-                    prompt,
-                    img
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=[
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "text": prompt
+                            },
+                            {
+                                "inline_data": {
+                                    "mime_type": mime_type,
+                                    "data": image_b64
+                                }
+                            }
+                        ]
+                    }
                 ]
             )
 
 
-            # --------------------------------------
-            # GET AI RESPONSE
-            # --------------------------------------
+            # ------------------------------
+            # GET RESPONSE
+            # ------------------------------
 
-            ai_output = response.text.strip().lower()
-
-
-            # Remove markdown if Gemini adds it
-            ai_output = ai_output.replace(
-                "```",
-                ""
-            ).strip()
+            ai_output = (
+                response.text
+                .strip()
+                .lower()
+            )
 
 
-            # --------------------------------------
-            # VALID CATEGORIES
-            # --------------------------------------
+            ai_output = (
+                ai_output
+                .replace("```", "")
+                .strip()
+            )
 
-            categories = [
+
+            # ------------------------------
+            # PARSE RESULT
+            # ------------------------------
+
+            parts = ai_output.split(
+                "|",
+                2
+            )
+
+
+            if len(parts) < 3:
+
+                return (
+                    "error",
+                    0.0,
+                    0.0,
+                    "AI returned an invalid response."
+                )
+
+
+            category = (
+                parts[0]
+                .strip()
+            )
+
+
+            weight_text = (
+                parts[1]
+                .strip()
+            )
+
+
+            tip = (
+                parts[2]
+                .strip()
+            )
+
+
+            valid_categories = [
                 "plastic",
                 "raddi",
                 "textile",
@@ -693,140 +643,82 @@ Do not return anything else.
             ]
 
 
-            key = None
-            tip = ""
-
-
-            # --------------------------------------
-            # READ category|tip
-            # --------------------------------------
-
-            if "|" in ai_output:
-
-                parts = ai_output.split(
-                    "|",
-                    1
-                )
-
-                possible_category = (
-                    parts[0]
-                    .strip()
-                )
-
-                possible_tip = (
-                    parts[1]
-                    .strip()
-                )
-
-
-                if possible_category in categories:
-
-                    key = possible_category
-
-                    tip = possible_tip
-
-
-            # --------------------------------------
-            # BACKUP CATEGORY DETECTION
-            # --------------------------------------
-
-            if key is None:
-
-                first_word = (
-                    ai_output
-                    .split()
-                )
-
-                if first_word:
-
-                    possible_category = (
-                        first_word[0]
-                        .strip()
-                        .replace(
-                            ":",
-                            ""
-                        )
-                    )
-
-
-                    if (
-                        possible_category
-                        in categories
-                    ):
-
-                        key = possible_category
-
-                        tip = ai_output
-
-
-            # --------------------------------------
-            # AI DID NOT RETURN VALID CATEGORY
-            # --------------------------------------
-
-            if key is None:
+            if category not in valid_categories:
 
                 return (
                     "error",
                     0.0,
                     0.0,
-                    "⚠️ AI could not identify this item. "
-                    "Please upload a clearer photo."
+                    "AI could not identify the material."
                 )
 
 
-            # ======================================
-            # 💰 CORRECT RATE FOR CATEGORY
-            # ======================================
+            # ------------------------------
+            # WEIGHT
+            # ------------------------------
 
-            if key == "plastic":
+            try:
+
+                weight = float(
+                    weight_text
+                )
+
+            except ValueError:
+
+                weight = 0.0
+
+
+            # Keep weight sensible
+            if weight < 0:
+
+                weight = 0.0
+
+            if weight > 1000:
+
+                weight = 1000.0
+
+
+            # ------------------------------
+            # RATE
+            # ------------------------------
+
+            if category == "plastic":
 
                 rate = LIVE_RATES[
                     "plastic"
                 ]
 
-
-            elif key == "raddi":
+            elif category == "raddi":
 
                 rate = LIVE_RATES[
                     "raddi"
                 ]
 
-
-            elif key == "textile":
+            elif category == "textile":
 
                 rate = LIVE_RATES[
                     "textile"
                 ]
 
-
-            elif key == "kitchen":
-
-                rate = 0.0
-
-
-            elif key == "landfill":
+            elif category == "kitchen":
 
                 rate = 0.0
-
 
             else:
 
                 rate = 0.0
 
 
-            # ======================================
-            # ⭐ POINTS
-            # ======================================
+            # ------------------------------
+            # POINTS
+            # ------------------------------
 
             points = 5.0
 
 
-            # ======================================
-            # RETURN RESULT
-            # ======================================
-
             return (
-                key,
+                category,
+                weight,
                 rate,
                 points,
                 tip
@@ -839,251 +731,458 @@ Do not return anything else.
                 "error",
                 0.0,
                 0.0,
-                f"⚠️ AI error: {str(e)}"
+                0.0,
+                f"AI error: {str(e)}"
             )
 
 
     # ==========================================
-    # 📸 UPLOAD WASTE IMAGE
+    # 📷 11. CAMERA
     # ==========================================
 
     with left_col:
 
         st.markdown(
-            "#### **2. Upload Waste Item**"
+            "#### 2. 📷 Take a Picture"
+        )
+
+        st.caption(
+            "Take a clear picture of the scrap material."
         )
 
 
-        uploaded_file = st.file_uploader(
-            "Upload a photo of your waste item:",
-            type=[
-                "jpg",
-                "jpeg",
-                "png"
-            ]
+        picture = st.camera_input(
+            "📷 Open Camera",
+            key="waste_camera",
+            resolution="720p"
         )
 
 
-        if uploaded_file is not None:
+        if picture is not None:
 
             st.image(
-                uploaded_file,
-                caption="Uploaded Waste Item",
+                picture,
+                caption="Captured Waste",
                 use_container_width=True
             )
 
 
             if active_member:
 
-                if st.button(
-                    "🤖 Analyze Waste with AI"
-                ):
+                analyze_button = st.button(
+                    "🤖 Identify + Estimate Weight",
+                    type="primary"
+                )
+
+
+                if analyze_button:
 
                     with st.spinner(
-                        "🧠 AI is analyzing your waste..."
+                        "🧠 AI is identifying the material..."
                     ):
 
-                        (
-                            category,
-                            rate,
-                            points,
-                            tip
-                        ) = analyze_image_with_gemini(
-                            uploaded_file,
-                            gemini_api_key
+                        result = (
+                            analyze_image_with_gemini(
+                                picture,
+                                gemini_api_key
+                            )
                         )
 
 
-                    # ==================================
-                    # SAVE RESULT
-                    # ==================================
+                    if result[0] == "error":
 
-                    st.session_state.last_result = {
-
-                        "category": category,
-
-                        "rate": rate,
-
-                        "points": points,
-
-                        "tip": tip,
-
-                        "member": active_member
-
-                    }
-
-
-                    # ==================================
-                    # ONLY ADD POINTS IF AI SUCCESSFUL
-                    # ==================================
-
-                    if category != "error":
-
-                        my_house[
-                            "scores"
-                        ][active_member] += points
-
-
-                        # ------------------------------
-                        # SAVE HISTORY
-                        # ------------------------------
-
-                        my_house[
-                            "history"
-                        ].append({
-
-                            "member": active_member,
-
-                            "category": category,
-
-                            "rate": rate,
-
-                            "points": points
-
-                        })
-
-
-                        st.success(
-                            "✅ Waste analyzed successfully!"
+                        st.error(
+                            result[-1]
                         )
 
                     else:
 
-                        st.error(
+                        (
+                            category,
+                            estimated_weight,
+                            rate,
+                            points,
                             tip
+                        ) = result
+
+
+                        # Save temporary result
+                        st.session_state.last_result = {
+
+                            "category": category,
+
+                            "estimated_weight":
+                                estimated_weight,
+
+                            "rate": rate,
+
+                            "points": points,
+
+                            "tip": tip,
+
+                            "member":
+                                active_member
+
+                        }
+
+
+                        st.success(
+                            "✅ Material identified!"
                         )
 
 
     # ==========================================
-    # 📊 DASHBOARD
+    # 📊 12. RESULTS
     # ==========================================
 
     with right_col:
 
         st.write(
-            "### 📊 Household Dashboard"
+            "### 📊 Waste Result"
         )
 
 
-        result = st.session_state.last_result
+        result = (
+            st.session_state.last_result
+        )
 
-
-        # ==========================================
-        # SHOW RESULT
-        # ==========================================
 
         if result is not None:
 
-            if result["category"] == "error":
+            category = result[
+                "category"
+            ]
 
-                st.error(
-                    result["tip"]
-                )
+            estimated_weight = result[
+                "estimated_weight"
+            ]
+
+            rate = result[
+                "rate"
+            ]
+
+            tip = result[
+                "tip"
+            ]
+
+
+            # ==================================
+            # CATEGORY
+            # ==================================
+
+            st.markdown(
+                f"""
+                <div class="illustration-box">
+
+                    <h1>
+                        ♻️ {category.upper()}
+                    </h1>
+
+                    <p>
+                        {tip}
+                    </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            # ==================================
+            # WEIGHT
+            # ==================================
+
+            st.markdown(
+                "#### ⚖️ Weight"
+            )
+
+            st.info(
+                "The AI weight is only a visual estimate. "
+                "For the correct selling price, confirm the "
+                "actual weight using a scale."
+            )
+
+
+            actual_weight = st.number_input(
+                "Confirm / adjust weight (kg):",
+                min_value=0.0,
+                max_value=1000.0,
+                value=float(
+                    estimated_weight
+                ),
+                step=0.1,
+                key="confirmed_weight"
+            )
+
+
+            # ==================================
+            # RATE
+            # ==================================
+
+            if category == "plastic":
+
+                rate = LIVE_RATES[
+                    "plastic"
+                ]
+
+            elif category == "raddi":
+
+                rate = LIVE_RATES[
+                    "raddi"
+                ]
+
+            elif category == "textile":
+
+                rate = LIVE_RATES[
+                    "textile"
+                ]
 
             else:
 
-                category_display = (
-                    result["category"]
-                    .upper()
-                )
+                rate = 0.0
 
 
-                st.markdown(
-                    f"""
-                    <div class="illustration-box">
+            # ==================================
+            # PRICE CALCULATION
+            # ==================================
 
-                        <h2>
-                            ♻️ {category_display}
-                        </h2>
-
-                        <h3>
-                            💰 Rs. {result['rate']:.2f} / kg
-                        </h3>
-
-                        <p>
-                            {result['tip']}
-                        </p>
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-
-                st.metric(
-                    "⭐ Points Earned",
-                    f"{result['points']:.1f}"
-                )
-
-
-        # ==========================================
-        # 🏆 FAMILY SCORES
-        # ==========================================
-
-        st.markdown(
-            "#### 🏆 Family Member Scores"
-        )
-
-
-        if my_house["scores"]:
-
-            for (
-                member,
-                score
-            ) in my_house["scores"].items():
-
-                st.markdown(
-                    f"""
-                    <div class="badge-box">
-
-                        👤 <b>{member}</b>
-
-                        <br>
-
-                        ⭐ {score:.1f} points
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-
-        # ==========================================
-        # 📜 WASTE HISTORY
-        # ==========================================
-
-        st.markdown(
-            "#### 📜 Waste History"
-        )
-
-
-        if my_house["history"]:
-
-            history_df = pd.DataFrame(
-                my_house["history"]
+            total_price = (
+                actual_weight * rate
             )
 
 
-            st.dataframe(
-                history_df,
-                use_container_width=True
+            st.markdown(
+                f"""
+                <div class="price-box">
+
+                    <h3>
+                        💰 Estimated Selling Price
+                    </h3>
+
+                    <h1>
+                        Rs. {total_price:,.2f}
+                    </h1>
+
+                    <p>
+                        {actual_weight:.2f} kg
+                        ×
+                        Rs. {rate:.2f}/kg
+                    </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True
             )
+
+
+            # ==================================
+            # SAVE SALE
+            # ==================================
+
+            if st.button(
+                "💾 Save This Scan"
+            ):
+
+                my_house[
+                    "scores"
+                ][result["member"]] += (
+                    result["points"]
+                )
+
+
+                my_house[
+                    "history"
+                ].append({
+
+                    "member":
+                        result["member"],
+
+                    "category":
+                        category,
+
+                    "weight_kg":
+                        actual_weight,
+
+                    "rate_per_kg":
+                        rate,
+
+                    "estimated_price":
+                        total_price,
+
+                    "points":
+                        result["points"]
+
+                })
+
+
+                st.success(
+                    "✅ Scan saved successfully!"
+                )
+
+
+            # ==================================
+            # 🏪 DEALER DROPDOWN
+            # ==================================
+
+            st.markdown(
+                "#### 🏪 Select Kabari Dealer"
+            )
+
+
+            dealer_names = [
+                dealer["name"]
+                for dealer in DEALERS
+            ]
+
+
+            selected_dealer_name = (
+                st.selectbox(
+                    "Choose a dealer:",
+                    dealer_names
+                )
+            )
+
+
+            selected_dealer = next(
+                dealer
+                for dealer in DEALERS
+                if dealer["name"]
+                == selected_dealer_name
+            )
+
+
+            st.markdown(
+                f"""
+                <div class="badge-box">
+
+                    <h3>
+                        🏪 {selected_dealer['name']}
+                    </h3>
+
+                    <p>
+                        📍 {selected_dealer['loc']}
+                    </p>
+
+                    <p>
+                        ♻️ {selected_dealer['items']}
+                    </p>
+
+                    <p>
+                        📞 {selected_dealer['phone']}
+                    </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            # ==================================
+            # 💬 WHATSAPP MESSAGE
+            # ==================================
+
+            whatsapp_message = (
+                f"Assalam o Alaikum, "
+                f"I have {actual_weight:.2f} kg of "
+                f"{category} scrap. "
+                f"The current rate shown by Trash to "
+                f"Treasure PK is Rs. {rate:.2f}/kg. "
+                f"Estimated total is Rs. "
+                f"{total_price:.2f}. "
+                f"Please confirm your buying rate."
+            )
+
+
+            whatsapp_url = (
+                "https://wa.me/"
+                + selected_dealer["phone"]
+                + "?text="
+                + quote(whatsapp_message)
+            )
+
+
+            st.link_button(
+                "💬 Contact Dealer on WhatsApp",
+                whatsapp_url,
+                type="primary"
+            )
+
 
         else:
 
             st.info(
-                "No waste scanning history yet."
+                "📷 Take a picture to start."
             )
 
 
     # ==========================================
-    # 🏪 KABARI DEALERS
+    # 🏆 13. FAMILY SCORES
     # ==========================================
 
     st.divider()
 
     st.subheader(
-        "🏪 Nearby Kabari / Recycling Contacts"
+        "🏆 Family Member Scores"
+    )
+
+
+    if my_house["scores"]:
+
+        for member, score in (
+            my_house["scores"].items()
+        ):
+
+            st.markdown(
+                f"""
+                <div class="badge-box">
+
+                    👤 <b>{member}</b>
+
+                    <br>
+
+                    ⭐ {score:.1f} points
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+    # ==========================================
+    # 📜 14. HISTORY
+    # ==========================================
+
+    st.subheader(
+        "📜 Waste History"
+    )
+
+
+    if my_house["history"]:
+
+        history_df = pd.DataFrame(
+            my_house["history"]
+        )
+
+        st.dataframe(
+            history_df,
+            use_container_width=True
+        )
+
+    else:
+
+        st.info(
+            "No saved scans yet."
+        )
+
+
+    # ==========================================
+    # 🏪 15. DEALER DIRECTORY
+    # ==========================================
+
+    st.divider()
+
+    st.subheader(
+        "🏪 Available Kabari Dealers"
     )
 
 
