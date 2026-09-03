@@ -1,5 +1,5 @@
-import streamlit as st
-import pandas as pd
+import streamlit st
+import pandas pd
 import requests
 
 # ==========================================
@@ -11,7 +11,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Apply beautiful CSS styling accents across widgets and blocks
 st.markdown("""
     <style>
     .main { background-color: #f4f7f6; }
@@ -22,7 +21,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 🌍 BRANDING BANNER LOGO & VISUAL ILLUSTRATION
 st.markdown("""
     <div class="title-banner">
         <h1 style="margin:0; font-size:38px;">💎 TRASH TO TREASURE PK</h1>
@@ -55,7 +53,6 @@ else:
         st.sidebar.success(f"🔓 Private space unlocked for: **{household_code}**")
 
     my_house = st.session_state.global_db[household_code]
-
     left_col, right_col = st.columns(2)
 
     # ==========================================
@@ -90,7 +87,7 @@ else:
     ]
 
     # ==========================================
-    # 🧠 5. AI IMAGE CLASSIFICATION ENGINE
+    # 🧠 5. AI IMAGE CLASSIFICATION ENGINE (YOUR NEW SNIPPET)
     # ==========================================
     def analyze_image_with_ai(uploaded_file):
         image_bytes = uploaded_file.getvalue()
@@ -190,3 +187,5 @@ else:
     st.divider()
     df_history = pd.DataFrame(my_house["history"])
     
+    if not df_history.empty:
+        st.subheader("📊 Your Private Savings Ledger")
