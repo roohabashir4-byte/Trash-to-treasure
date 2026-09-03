@@ -202,7 +202,6 @@ else:
             key = "raddi"
             tip = "📦 Save dry for monthly resale."
             
-            # ✅ RE-ENGINEERED STRUCTURAL FLATTENING (Guarantees zero indentation slips)
             if "|" in ai_output:
                 parts = ai_output.split("|")
                 if len(parts) >= 2:
@@ -210,4 +209,4 @@ else:
                     tip = parts[1].strip()
 
             if "raddi" in key:
- return "Raddi & Cardboard (ردی اور گتہ)", LIVE_RATES["raddi"], 5.0, tip
+                return "Raddi & Cardboard (ردی اور گتہ)", LIVE_RATES["raddi"], 5.0, tip
