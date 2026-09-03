@@ -100,9 +100,9 @@ else:
             results = response.json()
             
             top_prediction = ""
-            # ✅ COMPLETE UNPACKING RE-ENGINEERED TO PREVENT DATA SKIP ERRORS
+            # Safely navigate dictionary elements inside data frames
             if isinstance(results, list) and len(results) > 0:
-                first_item = results[0]  # Securely locate dictionary block inside list index
+                first_item = results[0]
                 if isinstance(first_item, dict) and 'label' in first_item:
                     top_prediction = first_item['label'].lower()
             elif isinstance(results, dict) and 'label' in results:
@@ -111,7 +111,7 @@ else:
             if not top_prediction:
                 top_prediction = "unknown"
 
-            # 🛠️ FIXED: ACCURATE PARSING RULES ACROSS DATA CLASSES
+            # Segment keywords for accurate classification
             if any(w in top_prediction for w in ['paper', 'newspaper', 'book', 'magazine', 'carton', 'cardboard', 'envelope', 'notebook', 'packet']):
                 return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
                 
@@ -125,7 +125,6 @@ else:
                 return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
                 
             else:
-                # Dynamic fallback category safety net if AI returns a complex term
                 return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
                 
         except Exception:
@@ -186,3 +185,6 @@ else:
         total_points = sum(my_house["scores"].values())
         st.write("#### **🌱 Family Digital Garden**")
         if total_points == 0:
+            st.caption("🪴 Status: Dry Soil - Awaiting your first sorted item logs!")
+        elif total_points < 200:
+            st.success("🌱 Status: Tiny Seedling (ننھا پودا) - Good start!")
