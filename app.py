@@ -171,7 +171,7 @@ raw_text_payload = "Assalam-o-Alaikum, I have sorted household recycling package
 clean_url_parameters = requests.utils.quote(raw_text_payload)
 
 # Cleaned syntax directly invoking internal deep-linking protocols
-final_wa_url = f"https://wa.me{dealer_info['phone']}?text={clean_url_parameters}"
+final_wa_url = "https://wa.me/" + str(dealer_info['phone']) + "?text=" + str(clean_url_parameters)
 
 # Native interactive element block completely bypassing standard markdown parsing bugs
 st.link_button("💬 Launch WhatsApp Mobile Dispatch", final_wa_url, type="primary", use_container_width=True)
