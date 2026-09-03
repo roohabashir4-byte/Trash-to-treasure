@@ -14,7 +14,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Advanced CSS injects handling theme layouts, flashing alerts, and custom visual cards
+# Apply beautiful CSS styling accents across widgets and blocks at the absolute top layer
 st.markdown("""
     <style>
     .main { background-color: #f4f7f6; }
@@ -174,6 +174,7 @@ else:
             if clean_name and clean_name not in my_house["scores"]:
                 my_house["scores"][clean_name] = 0
                 st.toast(f"Profile for '{clean_name}' created successfully! 🎉")
+                st.sidebar.write("")  # Dummy update to enforce refresh
                 st.rerun()
         
         if my_house["scores"]:
@@ -199,7 +200,6 @@ else:
             response = model.generate_content([prompt, img])
             ai_output = response.text.strip().lower()
             
-            # ✅ COMPILER STABILIZED VARIABLE SPLITTING LOOP
             key = "raddi"
             tip = "📦 Save dry for monthly resale."
             
