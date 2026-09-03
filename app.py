@@ -316,11 +316,7 @@ st.sidebar.subheader(
     "🧠 Google AI Studio Configuration"
 )
 
-gemini_api_key = st.sidebar.text_input(
-    "Enter Gemini API Key:",
-    type="password",
-    help="Get a free key from Google AI Studio website."
-)
+gemini_api_key = st.secrets["GEMINI_API_KEY"]
 
 
 # ==========================================
