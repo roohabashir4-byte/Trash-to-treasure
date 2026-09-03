@@ -210,3 +210,4 @@ else:
                     tip = parts[1].strip()
 
             if "raddi" in key:
+ return "Raddi & Cardboard (ردی اور گتہ)", LIVE_RATES["raddi"], 5.0, tip
