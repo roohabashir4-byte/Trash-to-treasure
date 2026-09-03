@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 # 1. Page Configuration
-st.set_page_config(page_title="Ghar Ka Saliqa", page_icon="🏡")
+st.set_page_config(page_title="Trash to Treasure PK", page_icon="💎")
 
 st.markdown("""
     <style>
