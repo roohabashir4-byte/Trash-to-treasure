@@ -9,7 +9,7 @@ st.markdown("""
     <style>
     .badge-box { background-color: #e3f2fd; border-radius: 10px; padding: 15px; border-left: 5px solid #2196f3; margin-bottom: 10px; }
     </style>
-""", unsafe_html=True)
+""", unsafe_allow_html=True)
 
 # 2. Session States
 if 'points' not in st.session_state: st.session_state.points = 0
