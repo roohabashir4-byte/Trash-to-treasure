@@ -113,7 +113,6 @@ LIVE_RATES = fetch_live_pakistan_rates()
 st.sidebar.header("🔑 Household Access")
 household_code = st.sidebar.text_input("Enter Household Code (گھر کا کوڈ):", placeholder="e.g., khan-house-chashma").strip().lower()
 
-# Render live sidebar rates ticker instantly below the access module
 st.sidebar.divider()
 st.sidebar.subheader("📈 Today's Punjab Bazar (لائیو ریٹ)")
 
@@ -137,7 +136,6 @@ st.sidebar.markdown(f"""
     <div class="sidebar-rate-text">🧵 <b>Fabric Clothes:</b> Rs. {LIVE_RATES['textile']:.2f} / kg</div>
 """, unsafe_allow_html=True)
 
-# 🔑 ADD GOOGLE GEMINI API KEY INPUT IN SIDEBAR TRAY Safely
 st.sidebar.divider()
 st.sidebar.subheader("🧠 Google AI Studio Configuration")
 gemini_api_key = st.sidebar.text_input("Enter Gemini API Key:", type="password", help="Get a free key from Google AI Studio website.")
@@ -185,24 +183,29 @@ else:
             active_member = None
 
     # ==========================================
-    # 🧠 6. ADVANCED GOOGLE GEMINI 1.5 FLASH ENGINE (COGNITIVE RESIDUAL)
+    # 🧠 6. ADVANCED GOOGLE GEMINI 1.5 FLASH ENGINE
     # ==========================================
     def analyze_image_with_gemini(uploaded_file, api_key):
         if not api_key:
             return "Raddi & Cardboard (ردی اور گتہ)", LIVE_RATES["raddi"], 5.0, "⚠️ Please provide your free Gemini API Key in the sidebar to unlock real AI features!"
             
         try:
-            # Configure Google generative AI client securely
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
-            
-            # Read image buffer directly from camera state
             img = Image.open(uploaded_file)
             
-            # Formulate prompt engineering guidelines for Pakistani household streams
-            prompt = """
-            Look at this household waste item captured by a mobile camera in Pakistan. 
-            Classify it into exactly ONE of the following 5 specific categories based on what you see:
-            1. 'raddi' (if it is a book, newspaper, textbook, cardboard carton, delivery box, or paper package)
-            2. 'plastic' (if it is a plastic drink bottle, shampoo flask, metal tin container, soda can, or juice glass)
-            3. 'textile' (if it is torn clothing, old bedsheets, rags, unwearable garments, or waste cloth fabrics)
+            # Formulate flattened layout prompt to prevent literal nesting breaks
+            prompt = "Look at this household waste item from Pakistan. Classify it into exactly ONE of these categories: 'raddi' (books, newspaper, cardboard), 'plastic' (drink bottle, cans, tin), 'textile' (torn clothing, rags, fabrics), 'kitchen' (peels, tea leaves, organic), or 'landfill' (diapers, shoppers, wrappers). Respond ONLY in this exact format with a pipeline separator, no quotes or symbols: category_keyword|short_urdu_and_english_household_tip"
+            
+            response = model.generate_content([prompt, img])
+            ai_output = response.text.strip().lower()
+            
+            if "|" in ai_output:
+                parts = ai_output.split("|")
+                key = parts[0].strip()
+                tip = parts[1].strip()
+            else:
+                key = "raddi"
+                tip = "📦 Save dry for monthly resale."
+
+            if "raddi" in key:
