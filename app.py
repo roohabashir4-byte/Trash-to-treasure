@@ -194,18 +194,19 @@ else:
             model = genai.GenerativeModel('gemini-1.5-flash')
             img = Image.open(uploaded_file)
             
-            # Formulate flattened layout prompt to prevent literal nesting breaks
             prompt = "Look at this household waste item from Pakistan. Classify it into exactly ONE of these categories: 'raddi' (books, newspaper, cardboard), 'plastic' (drink bottle, cans, tin), 'textile' (torn clothing, rags, fabrics), 'kitchen' (peels, tea leaves, organic), or 'landfill' (diapers, shoppers, wrappers). Respond ONLY in this exact format with a pipeline separator, no quotes or symbols: category_keyword|short_urdu_and_english_household_tip"
             
             response = model.generate_content([prompt, img])
             ai_output = response.text.strip().lower()
             
+            # ✅ COMPILER STABILIZED VARIABLE SPLITTING LOOP
+            key = "raddi"
+            tip = "📦 Save dry for monthly resale."
+            
             if "|" in ai_output:
                 parts = ai_output.split("|")
-                key = parts[0].strip()
-                tip = parts[1].strip()
-            else:
-                key = "raddi"
-                tip = "📦 Save dry for monthly resale."
+                if len(parts) >= 2:
+                    key = parts[0].strip()
+                    tip = parts[1].strip()
 
             if "raddi" in key:
