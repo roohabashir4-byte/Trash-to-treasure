@@ -94,7 +94,7 @@ else:
     # ==========================================
     def analyze_image_with_ai(uploaded_file):
         image_bytes = uploaded_file.getvalue()
-        API_URL = "https://huggingface.co"
+        API_URL = "https://api-inference.huggingface.co/models/microsoft/resnet-50"
         
         try:
             response = requests.post(API_URL, data=image_bytes, timeout=10)
@@ -109,11 +109,11 @@ else:
                 
             if any(w in top_prediction for w in ['paper', 'newspaper', 'book', 'magazine', 'carton', 'cardboard', 'envelope', 'notebook']):
                 return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
-            elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup']):
+            elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass']):
                 return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.5, "🍾 Wash, crush, and keep inside the Bachat Bag."
             elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater']):
                 return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 2.0, "🧵 Save for mattress filling or industrial wipers."
-            elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit']):
+            elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste']):
                 return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 1.0, "🌱 Add to plants as fertilizer. Zero badboo!"
             else:
                 return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
@@ -189,4 +189,4 @@ else:
     # ==========================================
     st.divider()
     df_history = pd.DataFrame(my_house["history"])
-    if not df_history.empty:
+    
