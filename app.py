@@ -89,7 +89,7 @@ else:
     ]
 
     # ==========================================
-    # 🧠 5. AI IMAGE CLASSIFICATION ENGINE
+    # 🧠 5. DEEP ANALYSIS IMAGE ENGINE (FIXED)
     # ==========================================
     def analyze_image_with_ai(uploaded_file):
         image_bytes = uploaded_file.getvalue()
@@ -99,25 +99,36 @@ else:
             response = requests.post(API_URL, data=image_bytes, timeout=10)
             results = response.json()
             
+            top_prediction = ""
+            # Safely navigate lists or objects returned by the inference node
             if isinstance(results, list) and len(results) > 0:
-                top_prediction = results[0].get('label', '').lower()
+                first_item = results[0]
+                if isinstance(first_item, dict) and 'label' in first_item:
+                    top_prediction = first_item['label'].lower()
             elif isinstance(results, dict) and 'label' in results:
-                top_prediction = results.get('label', '').lower()
-            else:
-                top_prediction = ""
+                top_prediction = results['label'].lower()
                 
+            if not top_prediction:
+                top_prediction = "unknown"
+
+            # Dynamic categorization mapping
             if any(w in top_prediction for w in ['paper', 'newspaper', 'book', 'magazine', 'carton', 'cardboard', 'envelope', 'notebook']):
                 return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
-            elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass']):
-                return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.5, "🍾 Wash, crush, and keep inside the Bachat Bag."
-            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater']):
-                return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 2.0, "🧵 Save for mattress filling or industrial wipers."
-            elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste']):
-                return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 1.0, "🌱 Add to plants as fertilizer. Zero badboo!"
+                
+            elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass', 'sprite', 'soda', 'pop']):
+                return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Wash, crush, and keep inside the Bachat Bag."
+                
+            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag']):
+                return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 1.0, "🧵 Save for mattress filling or industrial wipers."
+                
+            elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste', 'garbage']):
+                return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
+                
             else:
-                return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
+                return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Object processed. Wash and drop inside your Bachat Bag."
+                
         except Exception:
-            return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
+            return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Object processed. Wash and drop inside your Bachat Bag."
 
     # --- MAIN INGESTION PANEL LOGIC ---
     if active_member:
@@ -138,8 +149,7 @@ else:
                 """, unsafe_allow_html=True)
                 
                 value = rate * weight
-                if value > 0:
-                    st.metric(label="Scrap Market Value Forecast", value=f"Rs. {value:.1f}")
+                st.metric(label="Scrap Market Value Forecast", value=f"Rs. {value:.1f}")
                 
                 if st.button(f"➕ Accumulate Items to {active_member}'s Stats"):
                     my_house["scores"][active_member] += 50
@@ -178,14 +188,3 @@ else:
             st.caption("🪴 Status: Dry Soil - Awaiting your first sorted item logs!")
         elif total_points < 200:
             st.success("🌱 Status: Tiny Seedling (ننھا پودا) - Good start!")
-        elif total_points < 500:
-            st.success("🌿 Status: Growing Shrub (بڑا پودا) - Garden is growing!")
-        else:
-            st.success("🌳 Status: Blooming Jasmine Tree (چمبیلی کا درخت) - Ultimate Saliqa achieved!")
-
-    # ==========================================
-    # 📊 7. INDIVIDUAL HOUSEHOLD LEDGER SHEET
-    # ==========================================
-    st.divider()
-    df_history = pd.DataFrame(my_house["history"])
-    
