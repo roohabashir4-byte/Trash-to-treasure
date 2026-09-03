@@ -41,7 +41,43 @@ DEALERS = [
 ]
 
 # ==========================================
-# 🔑 3. DATA ISOLATION ENGINE (GHAR KA CODE)
+# 🧠 3. GLOBAL DEEP ANALYSIS IMAGE CLASSIFICATION ENGINE (PULLED TO TOP)
+# ==========================================
+def analyze_image_with_ai(uploaded_file):
+    image_bytes = uploaded_file.getvalue()
+    API_URL = "https://huggingface.co"
+    
+    try:
+        response = requests.post(API_URL, data=image_bytes, timeout=10)
+        results = response.json()
+        
+        top_prediction = ""
+        # ✅ FIXED: Explicitly checks and grabs index 0 of the list array safely
+        if isinstance(results, list) and len(results) > 0:
+            first_item = results[0]
+            if isinstance(first_item, dict) and 'label' in first_item:
+                top_prediction = first_item['label'].lower()
+        elif isinstance(results, dict) and 'label' in results:
+            top_prediction = results['label'].lower()
+            
+        if not top_prediction:
+            top_prediction = "unknown"
+
+        if any(w in top_prediction for w in ['paper', 'newspaper', 'book', 'magazine', 'carton', 'cardboard', 'envelope', 'notebook', 'packet']):
+            return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
+        elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass', 'sprite', 'soda', 'pop', 'vessel']):
+            return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Wash, crush, and keep inside the Bachat Bag."
+        elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel', 'handkerchief']):
+            return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 1.0, "🧵 Save for mattress filling or industrial wipers."
+        elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste', 'garbage', 'scraps']):
+            return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
+        else:
+            return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
+    except Exception:
+        return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
+
+# ==========================================
+# 🔑 4. DATA ISOLATION ENGINE (GHAR KA CODE)
 # ==========================================
 if 'global_db' not in st.session_state:
     st.session_state.global_db = {}
@@ -51,7 +87,7 @@ st.sidebar.write("Create or enter a unique code for your house to keep your prof
 
 household_code = st.sidebar.text_input("Enter Household Code (گھر کا کوڈ):", placeholder="e.g., khan-house-chashma").strip().lower()
 
-# Global placeholders for the baseline metrics scope
+# Global placeholder for the baseline metrics scope
 current_cash_total = 0.0
 
 if not household_code:
@@ -71,7 +107,7 @@ else:
     left_col, right_col = st.columns(2)
 
     # ==========================================
-    # 🎮 4. DYNAMIC USER REGISTRATION HUB
+    # 🎮 5. DYNAMIC USER REGISTRATION HUB
     # ==========================================
     with left_col:
         st.write("### 📸 AI Intelligent Waste Scanner")
@@ -90,42 +126,6 @@ else:
         else:
             st.warning("⚠️ No profiles found in your house yet. Enter a family name above to unlock scanning features!")
             active_member = None
-
-    # ==========================================
-    # 🧠 5. DEEP ANALYSIS IMAGE CLASSIFICATION ENGINE
-    # ==========================================
-    def analyze_image_with_ai(uploaded_file):
-        image_bytes = uploaded_file.getvalue()
-        API_URL = "https://huggingface.co"
-        
-        try:
-            response = requests.post(API_URL, data=image_bytes, timeout=10)
-            results = response.json()
-            
-            top_prediction = ""
-            # ✅ EXPLICIT FIX USING SQUARE BRACKETS FOR LIST SEPARATION
-            if isinstance(results, list) and len(results) > 0:
-                first_item = results[0]  # Extracts index 0 dictionary safely out of the array
-                if isinstance(first_item, dict) and 'label' in first_item:
-                    top_prediction = first_item['label'].lower()
-            elif isinstance(results, dict) and 'label' in results:
-                top_prediction = results['label'].lower()
-                
-            if not top_prediction:
-                top_prediction = "unknown"
-
-            if any(w in top_prediction for w in ['paper', 'newspaper', 'book', 'magazine', 'carton', 'cardboard', 'envelope', 'notebook', 'packet']):
-                return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
-            elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass', 'sprite', 'soda', 'pop', 'vessel']):
-                return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Wash, crush, and keep inside the Bachat Bag."
-            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel', 'handkerchief']):
-                return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 1.0, "🧵 Save for mattress filling or industrial wipers."
-            elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste', 'garbage', 'scraps']):
-                return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
-            else:
-                return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
-        except Exception:
-            return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
 
     # --- IMAGE INGESTION WORKFLOW LOGIC ---
     if active_member:
@@ -185,3 +185,6 @@ else:
         elif total_points < 500:
             st.success("🌿 Status: Growing Shrub (بڑا پودا) - Garden is growing!")
         else:
+            st.success("🌳 Status: Blooming Jasmine Tree (چمبیلی کا درخت) - Ultimate Saliqa achieved!")
+
+    # ==========================================
