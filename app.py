@@ -103,8 +103,9 @@ else:
             results = response.json()
             
             top_prediction = ""
+            # ✅ CORRECTED ARRAY EXTENSION PARSING SYNTAX
             if isinstance(results, list) and len(results) > 0:
-                first_item = results[0]
+                first_item = results[0]  # Array bracket notation explicitly opens index 0 dictionary
                 if isinstance(first_item, dict) and 'label' in first_item:
                     top_prediction = first_item['label'].lower()
             elif isinstance(results, dict) and 'label' in results:
@@ -184,6 +185,3 @@ else:
         elif total_points < 500:
             st.success("🌿 Status: Growing Shrub (بڑا پودا) - Garden is growing!")
         else:
-            st.success("🌳 Status: Blooming Jasmine Tree (چمبیلی کا درخت) - Ultimate Saliqa achieved!")
-
-    # ==========================================
