@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 # ==========================================
-# 🎨 1. THEME DESIGN & BRANDING CONFIGURATION
+# 🎨 1. GLOBAL THEME DESIGN & BRANDING CONFIGURATION
 # ==========================================
 st.set_page_config(
     page_title="Trash to Treasure PK", 
@@ -11,13 +11,27 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("💎 TRASH TO TREASURE PK")
-st.markdown("### **اسمارٹ کباڑ اور گھر کی بچت**")
-st.write("Turn your household waste into savings. Scan items, earn points, and alert local dealers.")
-st.divider()
+# Apply beautiful CSS styling accents across widgets and blocks at the absolute top layer
+st.markdown("""
+    <style>
+    .main { background-color: #f4f7f6; }
+    div[data-testid="stMetricValue"] { color: #2e7d32; font-weight: bold; }
+    .badge-box { background-color: #ffffff; border-radius: 14px; padding: 20px; border-left: 6px solid #2e7d32; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+    .title-banner { background: linear-gradient(135deg, #1b5e20, #4caf50); padding: 25px; border-radius: 12px; color: white; margin-bottom: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .illustration-box { background-color: #e8f5e9; padding: 20px; border-radius: 12px; text-align: center; border: 2px dashed #4caf50; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    </style>
+""", unsafe_allow_html=True)
+
+# 🌍 BRANDING BANNER LOGO & VISUAL ILLUSTRATION BANNER
+st.markdown("""
+    <div class="title-banner">
+        <h1 style="margin:0; font-size:38px;">💎 TRASH TO TREASURE PK</h1>
+        <p style="margin:5px 0 0 0; font-size:18px;"><b>اسمارٹ کباڑ اور گھر کی بچت</b></p>
+    </div>
+""", unsafe_allow_html=True)
 
 # ==========================================
-# 📦 2. REGIONAL KABARI YARD DATA (ALWAYS ACCESSIBLE)
+# 📦 2. REGIONAL KABARI YARD DATA (ALWAYS ANCHORED)
 # ==========================================
 DEALERS = [
     {"name": "Kabar Shop (Kundian)", "phone": "923017800615", "loc": "Garnely Road, Kundian", "items": "Plastics, Paper, Metal Tins"},
@@ -37,24 +51,28 @@ st.sidebar.write("Create or enter a unique code for your house to keep your prof
 
 household_code = st.sidebar.text_input("Enter Household Code (گھر کا کوڈ):", placeholder="e.g., khan-house-chashma").strip().lower()
 
+# Global placeholders for the baseline metrics scope
 current_cash_total = 0.0
 
 if not household_code:
-    st.warning("👋 Welcome! Please type a unique Household Code in the sidebar to load your private, customized space.")
-    st.info("💡 Tip: You can invent any code you want (like your name or house number). Just remember it so your family can log back in later!")
+    st.warning("👋 Welcome! Please type a unique **Household Code** in the sidebar to load your private, customized space.")
+    st.info("💡 *Tip: You can invent any code you want (like your name or house number). Just remember it so your family can log back in later!*")
 else:
     if household_code not in st.session_state.global_db:
         st.session_state.global_db[household_code] = {
             "scores": {},      
             "history": []       
         }
-        st.sidebar.success(f"🆕 New private space initialized for code: {household_code}!")
+        st.sidebar.success(f"🆕 New private space initialized for code: **{household_code}**!")
     else:
-        st.sidebar.success(f"🔓 Private space unlocked for: {household_code}")
+        st.sidebar.success(f"🔓 Private space unlocked for: **{household_code}**")
 
     my_house = st.session_state.global_db[household_code]
     left_col, right_col = st.columns(2)
 
+    # ==========================================
+    # 🎮 4. DYNAMIC USER REGISTRATION HUB
+    # ==========================================
     with left_col:
         st.write("### 📸 AI Intelligent Waste Scanner")
         st.markdown("#### **1. Register Family Members**")
@@ -64,7 +82,7 @@ else:
             clean_name = new_member.strip()
             if clean_name and clean_name not in my_house["scores"]:
                 my_house["scores"][clean_name] = 0
-                st.toast(f"Profile for '{clean_name}' created in your house! 🎉")
+                st.toast(f"Profile for '{clean_name}' created successfully! 🎉")
                 st.rerun()
         
         if my_house["scores"]:
@@ -73,6 +91,9 @@ else:
             st.warning("⚠️ No profiles found in your house yet. Enter a family name above to unlock scanning features!")
             active_member = None
 
+    # ==========================================
+    # 🧠 5. DEEP ANALYSIS IMAGE CLASSIFICATION ENGINE
+    # ==========================================
     def analyze_image_with_ai(uploaded_file):
         image_bytes = uploaded_file.getvalue()
         API_URL = "https://huggingface.co"
@@ -82,6 +103,7 @@ else:
             results = response.json()
             
             top_prediction = ""
+            # Completely fixed dictionary parsing layout array tracking
             if isinstance(results, list) and len(results) > 0:
                 first_item = results[0]
                 if isinstance(first_item, dict) and 'label' in first_item:
@@ -96,7 +118,7 @@ else:
                 return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
             elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass', 'sprite', 'soda', 'pop', 'vessel']):
                 return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Wash, crush, and keep inside the Bachat Bag."
-            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel']):
+            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel', 'handkerchief']):
                 return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 1.0, "🧵 Save for mattress filling or industrial wipers."
             elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste', 'garbage', 'scraps']):
                 return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
@@ -105,6 +127,7 @@ else:
         except Exception:
             return "Landfill Waste (عام کچرا)", 0, 0.5, "🗑️ Dispose tightly via the daily vehicle."
 
+    # --- IMAGE INGESTION WORKFLOW LOGIC ---
     if active_member:
         with left_col:
             img_file = st.camera_input("📸 Take a photo of your trash item")
@@ -129,9 +152,20 @@ else:
                     st.toast(f"Points logged for {active_member}! 🏆")
                     st.rerun()
 
+    # ==========================================
+    # 🖼️ 6. SIDE PANEL ILLUSTRATION BANNER CARD & LEADERBOARD
+    # ==========================================
     with right_col:
-        st.write("### 👨‍👩‍👧‍👦 Ghar Ka Saliqa")
-        st.write("Working together to keep your kitchen clean and collect bachat!")
+        st.markdown("""
+            <div class="illustration-box">
+                <p style="font-size:60px; margin:0; padding:0;">👨‍👩‍👧‍👦♻️📦</p>
+                <h4 style="color:#1b5e20; margin:10px 0 5px 0; font-size:20px;"><b>Ghar Ka Saliqa</b></h4>
+                <p style="font-size:13px; color:#555; margin:0; line-height:1.4;">
+                    Your isolated household data stack. Working together to keep your kitchen clean and collect bachat!
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+        
         st.write("### 🏆 Ghar Ki Deewar")
         st.write("#### **Your Family Leaderboard**")
         
@@ -143,6 +177,7 @@ else:
             
         total_points = sum(my_house["scores"].values())
         st.write("#### **🌱 Family Digital Garden**")
+        
         if total_points == 0:
             st.caption("🪴 Status: Dry Soil - Awaiting your first sorted item logs!")
         elif total_points < 200:
@@ -150,36 +185,3 @@ else:
         elif total_points < 500:
             st.success("🌿 Status: Growing Shrub (بڑا پودا) - Garden is growing!")
         else:
-            st.success("🌳 Status: Blooming Jasmine Tree (چمبیلی کا درخت) - Ultimate Saliqa achieved!")
-
-    st.divider()
-    df_history = pd.DataFrame(my_house["history"])
-    
-    if not df_history.empty:
-        st.subheader("📊 Your Private Savings Ledger")
-        col_m1, col_m2 = st.columns(2)
-        col_m1.metric("Gross Weight Saved", f"{df_history['Weight'].sum():.1f} kg")
-        col_m2.metric("Gross Revenue Earned", f"Rs. {df_history['Cash Value'].sum():.1f}")
-        st.dataframe(df_history, use_container_width=True)
-        current_cash_total = df_history['Cash Value'].sum()
-    else:
-        st.info("Your savings ledger table is empty. Create profiles and scan items to record your stats!")
-
-# ==========================================
-# 📲 8. MAIN PLATFORM BASE DIRECTORY & WHATSAPP GATEWAY (PERMANENT)
-# ==========================================
-st.divider()
-st.subheader("📍 Doorstep Dispatches to Local Chashma/Kundian Yards")
-selected_dealer = st.selectbox("Select a local scrap merchant to contact:", [d["name"] for d in DEALERS])
-dealer_info = next(d for d in DEALERS if d["name"] == selected_dealer)
-
-st.write(f"📍 **Address:** {dealer_info['loc']} | 📦 **Accepts:** {dealer_info['items']}")
-
-raw_text_payload = (
-    f"Assalam-o-Alaikum, I have sorted household recycling packages ready near Chashma. "
-    f"Total estimated ledger value is Rs. {current_cash_total:.1f}. Please confirm pickup window."
-)
-clean_url_parameters = requests.utils.quote(raw_text_payload)
-
-final_wa_url = "https://wa.me" + str(dealer_info['phone']) + "?text=" + str(clean_url_parameters)
-st.link_button("💬 Launch WhatsApp Mobile Dispatch", final_wa_url, type="primary", use_container_width=True)
