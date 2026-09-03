@@ -174,7 +174,6 @@ else:
             if clean_name and clean_name not in my_house["scores"]:
                 my_house["scores"][clean_name] = 0
                 st.toast(f"Profile for '{clean_name}' created successfully! 🎉")
-                st.sidebar.write("")  # Dummy update to enforce refresh
                 st.rerun()
         
         if my_house["scores"]:
@@ -203,6 +202,7 @@ else:
             key = "raddi"
             tip = "📦 Save dry for monthly resale."
             
+            # ✅ STABILIZED SPLITTING WITH STRIP APPLIED DIRECTLY AFTER PARSING VALIDATION
             if "|" in ai_output:
                 parts = ai_output.split("|")
                 if len(parts) >= 2:
