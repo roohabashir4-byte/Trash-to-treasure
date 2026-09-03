@@ -103,9 +103,9 @@ else:
             results = response.json()
             
             top_prediction = ""
-            # ✅ CORRECTED ARRAY EXTENSION PARSING SYNTAX
+            # ✅ ABSOLUTE ARRAY INDEXING FIX FOR LIST DURATION EXTRACTIONS
             if isinstance(results, list) and len(results) > 0:
-                first_item = results[0]  # Array bracket notation explicitly opens index 0 dictionary
+                first_item = results[0] # Square brackets open index 0 dictionary safely
                 if isinstance(first_item, dict) and 'label' in first_item:
                     top_prediction = first_item['label'].lower()
             elif isinstance(results, dict) and 'label' in results:
