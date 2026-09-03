@@ -31,7 +31,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 📦 2. REGIONAL KABARI YARD DATA (ALWAYS ACCESSIBLE)
+# 📦 2. REGIONAL KABARI YARD DATA
 # ==========================================
 DEALERS = [
     {"name": "Kabar Shop (Kundian)", "phone": "923017800615", "loc": "Garnely Road, Kundian", "items": "Plastics, Paper, Metal Tins"},
@@ -92,7 +92,7 @@ else:
             active_member = None
 
     # ==========================================
-    # 🧠 5. DEEP ANALYSIS IMAGE ENGINE (FIXED INDEX HANDLING)
+    # 🧠 5. DEEP ANALYSIS IMAGE ENGINE
     # ==========================================
     def analyze_image_with_ai(uploaded_file):
         image_bytes = uploaded_file.getvalue()
@@ -104,7 +104,7 @@ else:
             
             top_prediction = ""
             if isinstance(results, list) and len(results) > 0:
-                first_item = results[0]
+                first_item = results[0]  # Exact target key array fix
                 if isinstance(first_item, dict) and 'label' in first_item:
                     top_prediction = first_item['label'].lower()
             elif isinstance(results, dict) and 'label' in results:
@@ -117,7 +117,7 @@ else:
                 return "Raddi & Cardboard (ردی اور گتہ)", 45, 5.0, "📦 Save dry for monthly resale."
             elif any(w in top_prediction for w in ['bottle', 'plastic', 'can', 'tin', 'container', 'flask', 'beaker', 'cup', 'glass', 'sprite', 'soda', 'pop', 'vessel']):
                 return "Kabari Plastics & Tins (کباڑی مال)", 50, 0.1, "🍾 Wash, crush, and keep inside the Bachat Bag."
-            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel']):
+            elif any(w in top_prediction for w in ['cloth', 'fabric', 'shirt', 'jeans', 'textile', 'towel', 'dress', 'blanket', 'coat', 'jersey', 'sweater', 'rag', 'wool', 'cotton', 'red', 'maroon', 'velvet', 'silk', 'garment', 'apparel', 'handkerchief']):
                 return "Torn Clothes & Fabrics (پرانے کپڑے)", 35, 1.0, "🧵 Save for mattress filling or industrial wipers."
             elif any(w in top_prediction for w in ['food', 'banana', 'apple', 'vegetable', 'peel', 'leaf', 'tea', 'coffee', 'orange', 'fruit', 'waste', 'garbage', 'scraps']):
                 return "Kitchen Waste (باورچی خانہ کا کچرا)", 0, 0.5, "🌱 Add to plants as fertilizer. Zero badboo!"
