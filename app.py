@@ -322,260 +322,141 @@ def save_record(
 # PROFESSIONAL PUBLIC LANDING PAGE
 # ============================================================
 def landing_page():
-    # Visuals are loaded from Unsplash's image CDN. They are only used on
-    # the public landing page; the app's data/backend remains unchanged.
+    # Remote public photos are used only for visual presentation.
+    hero_image = "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=1200&q=85"
     step_images = [
-        "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=900&q=80",
-        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=900&q=80",
-        "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=900&q=80",
-        "https://images.unsplash.com/photo-1559526324-593bc073d938?w=900&q=80",
-        "https://images.unsplash.com/photo-1528323273322-d81458248d40?w=900&q=80",
+        "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=700&q=80",
+        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=700&q=80",
+        "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=700&q=80",
+        "https://images.unsplash.com/photo-1559526324-593bc073d938?w=700&q=80",
+        "https://images.unsplash.com/photo-1528323273322-d81458248d40?w=700&q=80",
     ]
 
+    # All HTML blocks below are intentionally self-contained.
+    # This prevents Streamlit widgets from being placed inside open HTML
+    # elements, which was causing the previous landing page to become
+    # unclickable and display raw HTML.
     st.markdown(
         """
         <style>
-        /* Landing-page-only styling */
-        .tt-shell {
-            max-width: 1240px;
-            margin: 0 auto;
-        }
+        .tt-wrap { max-width:1240px; margin:0 auto; }
         .tt-nav {
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding: .6rem 0 1rem;
-            border-bottom:1px solid #e9eee9;
-            margin-bottom:1rem;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:8px 0 16px; border-bottom:1px solid #e7ece8;
+            margin-bottom:18px;
         }
-        .tt-brand {
-            display:flex;
-            align-items:center;
-            gap:.55rem;
-            font-size:1.35rem;
-            font-weight:800;
-            letter-spacing:-.03em;
-            color:#13231b;
-        }
+        .tt-brand { font-size:1.42rem; font-weight:850; color:#14231b; }
         .tt-brand span { color:#168447; }
         .tt-navlinks {
-            display:flex;
-            gap:1.6rem;
-            color:#33423a;
-            font-size:.92rem;
-            font-weight:600;
+            display:flex; gap:24px; color:#405047; font-size:.9rem;
+            font-weight:650;
         }
-        .tt-hero {
-            min-height:510px;
-            border-radius:30px;
-            overflow:hidden;
-            position:relative;
-            background:
-                linear-gradient(90deg, rgba(248,252,248,.98) 0%,
-                rgba(248,252,248,.94) 48%, rgba(248,252,248,.28) 100%),
-                url("https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=1800&q=85")
-                center/cover;
-            display:flex;
-            align-items:center;
-            padding:3.8rem;
-            box-shadow:0 14px 40px rgba(22,70,43,.10);
+        .tt-hero-copy {
+            padding:28px 0 8px;
         }
-        .tt-hero-copy { max-width:650px; }
-        .tt-eyebrow {
-            display:inline-block;
-            padding:.4rem .75rem;
-            border-radius:999px;
-            background:#e6f5e9;
-            color:#167a42;
-            font-size:.75rem;
-            font-weight:800;
-            letter-spacing:.08em;
+        .tt-pill {
+            display:inline-block; padding:7px 12px; border-radius:999px;
+            background:#e8f6eb; color:#167a42; font-size:.72rem;
+            font-weight:800; letter-spacing:.08em;
         }
-        .tt-hero h1 {
-            font-size:clamp(2.7rem,5vw,4.6rem);
-            line-height:1.02;
-            letter-spacing:-.055em;
-            color:#13231b;
-            margin:1rem 0;
+        .tt-title {
+            font-size:clamp(2.7rem,5vw,4.5rem); line-height:1.02;
+            letter-spacing:-.055em; color:#14231b; margin:18px 0 14px;
         }
-        .tt-hero h1 .green { color:#168447; }
-        .tt-hero p {
-            font-size:1.14rem;
-            line-height:1.65;
-            color:#3f4d45;
-            max-width:610px;
-            margin-bottom:1.4rem;
-        }
-        .tt-phone {
-            position:absolute;
-            right:6%;
-            bottom:0;
-            width:280px;
-            background:#101511;
-            border:7px solid #111;
-            border-radius:34px 34px 0 0;
-            padding:11px;
-            box-shadow:0 22px 45px rgba(0,0,0,.22);
-            transform:rotate(2deg);
-        }
-        .tt-phone-screen {
-            background:white;
-            border-radius:22px;
-            overflow:hidden;
-            padding-bottom:12px;
-        }
-        .tt-phone-screen img {
-            width:100%;
-            height:165px;
-            object-fit:cover;
-        }
-        .tt-phone-body { padding:10px 13px; }
-        .tt-phone-body h3 { margin:0 0 5px; font-size:1.1rem; color:#17231c; }
-        .tt-price { color:#128344; font-size:1.25rem; font-weight:800; }
-        .tt-phone-btn {
-            margin-top:10px;
-            padding:9px;
-            border-radius:10px;
-            text-align:center;
-            background:#168447;
-            color:white;
-            font-weight:700;
-            font-size:.75rem;
+        .tt-title-green { color:#168447; }
+        .tt-lead {
+            color:#526159; font-size:1.08rem; line-height:1.65;
+            max-width:650px;
         }
         .tt-trust {
-            display:flex;
-            gap:1.4rem;
-            flex-wrap:wrap;
-            margin-top:1rem;
-            color:#3f4d45;
-            font-size:.85rem;
-            font-weight:600;
+            display:flex; flex-wrap:wrap; gap:20px; margin:12px 0 0;
+            color:#405047; font-size:.84rem; font-weight:650;
         }
-        .tt-section {
-            padding:3.5rem 0 .8rem;
+        .tt-visual {
+            border-radius:28px; padding:12px; background:#eef7ee;
+            box-shadow:0 18px 45px rgba(20,70,40,.13);
         }
-        .tt-section-head {
-            text-align:center;
-            margin-bottom:2rem;
-        }
-        .tt-section-head h2 {
-            font-size:2.25rem;
-            letter-spacing:-.04em;
-            color:#13231b;
-            margin:.35rem 0;
-        }
-        .tt-section-head p { color:#68756e; }
-        .tt-steps {
-            display:grid;
-            grid-template-columns:repeat(5,1fr);
-            gap:1rem;
-        }
-        .tt-step {
-            background:white;
-            border:1px solid #e3eae4;
+        .tt-visual img {
+            width:100%; height:380px; object-fit:cover;
             border-radius:22px;
-            overflow:hidden;
-            box-shadow:0 5px 20px rgba(20,60,35,.06);
         }
-        .tt-step-img {
-            width:100%;
-            height:155px;
-            object-fit:cover;
-            display:block;
+        .tt-phone-card {
+            background:white; border:1px solid #e1e9e2;
+            border-radius:18px; padding:14px; margin-top:-86px;
+            margin-left:35px; margin-right:35px; position:relative;
+            box-shadow:0 12px 30px rgba(0,0,0,.13);
         }
-        .tt-step-body { padding:1rem; }
-        .tt-num {
-            width:30px;
-            height:30px;
-            border-radius:50%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#168447;
-            color:white;
-            font-weight:800;
-            margin-bottom:.65rem;
+        .tt-phone-card h3 { margin:0 0 4px; color:#17251d; }
+        .tt-price { color:#128344; font-size:1.35rem; font-weight:850; }
+        .tt-section { padding:54px 0 5px; }
+        .tt-kicker {
+            color:#168447; font-weight:800; font-size:.76rem;
+            letter-spacing:.08em; text-align:center;
         }
-        .tt-step h3 { margin:0 0 .4rem; color:#17231c; font-size:1.05rem; }
-        .tt-step p { margin:0; color:#68756e; line-height:1.45; font-size:.88rem; }
-        .tt-benefits {
-            display:grid;
-            grid-template-columns:repeat(4,1fr);
-            gap:1rem;
+        .tt-section h2 {
+            text-align:center; color:#14231b; font-size:2.25rem;
+            letter-spacing:-.04em; margin:7px 0;
         }
+        .tt-subtitle {
+            text-align:center; color:#6a766f; margin-bottom:24px;
+        }
+        .tt-step-card {
+            background:#fff; border:1px solid #e1e9e2; border-radius:18px;
+            overflow:hidden; box-shadow:0 5px 18px rgba(20,60,35,.06);
+        }
+        .tt-step-card img {
+            width:100%; height:145px; object-fit:cover; display:block;
+        }
+        .tt-step-body { padding:12px 13px 16px; }
+        .tt-step-number {
+            width:29px; height:29px; border-radius:50%; background:#168447;
+            color:#fff; display:flex; align-items:center;
+            justify-content:center; font-weight:800; margin-bottom:8px;
+        }
+        .tt-step-body h3 { margin:0 0 5px; color:#17251d; font-size:1rem; }
+        .tt-step-body p { margin:0; color:#6a766f; font-size:.83rem; line-height:1.45; }
         .tt-benefit {
-            min-height:180px;
-            padding:1.35rem;
-            border-radius:22px;
-            background:#f3f8f1;
-            border:1px solid #e0eadf;
+            background:#f3f8f1; border:1px solid #e0eadf; border-radius:20px;
+            padding:20px; min-height:170px;
         }
-        .tt-icon { font-size:2rem; }
-        .tt-benefit h3 { color:#17231c; margin:.45rem 0; }
-        .tt-benefit p { color:#68756e; line-height:1.5; }
+        .tt-benefit-icon { font-size:2rem; }
+        .tt-benefit h3 { color:#17251d; margin:8px 0 5px; }
+        .tt-benefit p { color:#68756e; line-height:1.5; margin:0; }
         .tt-impact {
-            margin-top:3rem;
-            border-radius:28px;
-            padding:3rem;
-            background:linear-gradient(135deg,#0d6337,#168447);
-            color:white;
-            display:grid;
-            grid-template-columns:1.3fr 1fr;
-            gap:2rem;
-            align-items:center;
+            margin-top:52px; padding:38px; border-radius:27px;
+            background:linear-gradient(135deg,#0d6337,#168447); color:white;
         }
-        .tt-impact h2 {
-            font-size:2.4rem;
-            margin:0 0 .7rem;
+        .tt-impact h2 { color:white; text-align:left; margin:0 0 8px; }
+        .tt-impact p { line-height:1.6; opacity:.92; }
+        .tt-stat {
+            text-align:center; background:rgba(255,255,255,.10);
+            border:1px solid rgba(255,255,255,.18); border-radius:16px;
+            padding:15px;
         }
-        .tt-impact p { opacity:.9; line-height:1.6; }
-        .tt-stats {
-            display:grid;
-            grid-template-columns:repeat(3,1fr);
-            gap:1rem;
-            text-align:center;
-        }
-        .tt-stat strong { display:block; font-size:2rem; }
-        .tt-stat span { opacity:.85; font-size:.8rem; }
-        .tt-testimonial {
-            background:white;
-            color:#26342c;
-            padding:1.3rem;
-            border-radius:20px;
-            margin-top:1.3rem;
+        .tt-stat strong { display:block; font-size:1.65rem; }
+        .tt-stat span { font-size:.78rem; opacity:.88; }
+        .tt-quote {
+            margin-top:18px; background:white; color:#26352c;
+            padding:16px 18px; border-radius:17px;
         }
         .tt-footer {
-            padding:2rem 0 1rem;
-            color:#6b776f;
-            display:flex;
-            justify-content:space-between;
-            gap:1rem;
-            font-size:.85rem;
+            padding:25px 0 8px; color:#6a766f; font-size:.83rem;
+            display:flex; justify-content:space-between; gap:18px;
         }
-        @media (max-width: 950px) {
+        @media (max-width:900px) {
             .tt-navlinks { display:none; }
-            .tt-hero { padding:2rem; min-height:620px; }
-            .tt-phone { opacity:.28; right:3%; }
-            .tt-steps { grid-template-columns:repeat(2,1fr); }
-            .tt-benefits { grid-template-columns:repeat(2,1fr); }
-            .tt-impact { grid-template-columns:1fr; }
-        }
-        @media (max-width: 600px) {
-            .tt-hero { padding:1.5rem; }
-            .tt-hero h1 { font-size:2.65rem; }
-            .tt-phone { display:none; }
-            .tt-steps, .tt-benefits { grid-template-columns:1fr; }
-            .tt-stats { grid-template-columns:1fr; }
-            .tt-footer { flex-direction:column; }
+            .tt-visual img { height:300px; }
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
+    # Navigation is visual; the two actual actions are Streamlit buttons
+    # below, so they remain fully clickable and reliable.
     st.markdown(
         """
-        <div class="tt-shell">
+        <div class="tt-wrap">
           <div class="tt-nav">
             <div class="tt-brand">♻️ Trash to <span>Treasure</span></div>
             <div class="tt-navlinks">
@@ -585,143 +466,181 @@ def landing_page():
               <span>FAQ</span>
             </div>
           </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-          <div class="tt-hero">
+    left, right = st.columns([1.12, .88], gap="large")
+
+    with left:
+        st.markdown(
+            """
             <div class="tt-hero-copy">
-              <div class="tt-eyebrow">SMART SCRAP • LOCAL VALUE • EASY SELLING</div>
-              <h1>Don't throw it away.<br><span class="green">Find out what it's worth.</span></h1>
-              <p>
+              <div class="tt-pill">SMART SCRAP • LOCAL VALUE • EASY SELLING</div>
+              <div class="tt-title">
+                Don't throw it away.<br>
+                <span class="tt-title-green">Find out what it's worth.</span>
+              </div>
+              <div class="tt-lead">
                 Identify your scrap, get an estimated value, and connect with
                 verified buyers near you — all from one simple app.
-              </p>
-        """,
-        unsafe_allow_html=True,
-    )
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    cta1, cta2 = st.columns([1, .55])
-    with cta1:
-        if st.button("📷  Start Now — It's Free", type="primary",
-                     use_container_width=True, key="landing_start"):
-            st.session_state.auth_mode = "login"
-            st.rerun()
-    with cta2:
-        if st.button("♙  Login", use_container_width=True, key="landing_login"):
-            st.session_state.auth_mode = "login"
-            st.rerun()
+        a, b = st.columns([1.15, .65])
+        with a:
+            if st.button("📷  Start Now — It's Free", type="primary",
+                         use_container_width=True, key="landing_start"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
+        with b:
+            if st.button("♙  Login", use_container_width=True,
+                         key="landing_login"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
+
+        st.markdown(
+            """
+            <div class="tt-trust">
+              <span>🛡️ Safe & Private</span>
+              <span>📍 Local Buyers</span>
+              <span>✓ Verified Dealers</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with right:
+        st.markdown('<div class="tt-visual">', unsafe_allow_html=True)
+        st.image(hero_image, use_container_width=True)
+        st.markdown(
+            """
+            <div class="tt-phone-card">
+              <h3>♻️ Copper Scrap</h3>
+              <div style="font-size:.76rem;color:#718078">Estimated value</div>
+              <div class="tt-price">Rs. 3,250</div>
+              <div style="font-size:.72rem;color:#718078">5 kg × available rate</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(
         """
-              <div class="tt-trust">
-                <span>🛡️ Safe & Private</span>
-                <span>📍 Local Buyers</span>
-                <span>✓ Verified Dealers</span>
-              </div>
-            </div>
-
-            <div class="tt-phone">
-              <div class="tt-phone-screen">
-                <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=700&q=80">
-                <div class="tt-phone-body">
-                  <h3>Copper</h3>
-                  <div style="font-size:.7rem;color:#718078">Estimated value</div>
-                  <div class="tt-price">Rs. 3,250</div>
-                  <div style="font-size:.72rem;color:#718078;margin-top:7px">5 kg × current rate</div>
-                  <div class="tt-phone-btn">Find Buyers Near Me</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="tt-wrap tt-section">
+          <div class="tt-kicker">🌿 SIMPLE FROM START TO SALE</div>
+          <h2>How It Works</h2>
+          <div class="tt-subtitle">Five simple steps to turn unwanted stuff into treasure.</div>
         </div>
-
-        <div class="tt-shell tt-section">
-          <div class="tt-section-head">
-            <div style="color:#168447;font-weight:800">🌿 SIMPLE FROM START TO SALE</div>
-            <h2>How It Works</h2>
-            <p>Five simple steps to turn unwanted stuff into treasure.</p>
-          </div>
         """,
         unsafe_allow_html=True,
     )
 
-    steps = [
-        ("Take a Picture", "Snap a clear photo of the item you want to sell.", step_images[0]),
-        ("We Identify It", "Our AI identifies the most likely material.", step_images[1]),
-        ("Add Weight", "Enter the measured weight for a better estimate.", step_images[2]),
-        ("See Your Value", "Get an estimated value using the available rate.", step_images[3]),
-        ("Find a Buyer", "Connect with a suitable verified local dealer.", step_images[4]),
+    cols = st.columns(5, gap="small")
+    step_data = [
+        ("Take a Picture", "Snap a clear photo of your scrap.", step_images[0]),
+        ("We Identify It", "AI identifies the likely material.", step_images[1]),
+        ("Add Weight", "Enter your measured weight.", step_images[2]),
+        ("See Your Value", "Get an estimate from the available rate.", step_images[3]),
+        ("Find a Buyer", "Connect with a suitable verified dealer.", step_images[4]),
     ]
-
-    step_html = '<div class="tt-steps">'
-    for i, (title, desc, img) in enumerate(steps, 1):
-        step_html += f"""
-        <div class="tt-step">
-          <img class="tt-step-img" src="{img}" alt="{title}">
-          <div class="tt-step-body">
-            <div class="tt-num">{i}</div>
-            <h3>{title}</h3>
-            <p>{desc}</p>
-          </div>
-        </div>
-        """
-    step_html += "</div>"
-    st.markdown(step_html, unsafe_allow_html=True)
+    for i, (title, desc, img) in enumerate(step_data, 1):
+        with cols[i - 1]:
+            st.markdown('<div class="tt-step-card">', unsafe_allow_html=True)
+            st.image(img, use_container_width=True)
+            st.markdown(
+                f"""
+                <div class="tt-step-body">
+                  <div class="tt-step-number">{i}</div>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(
         """
-        <div class="tt-section-head" style="margin-top:3.5rem">
-          <div style="color:#168447;font-weight:800">♻️ MADE FOR REAL PEOPLE</div>
+        <div class="tt-wrap tt-section">
+          <div class="tt-kicker">♻️ MADE FOR REAL PEOPLE</div>
           <h2>Why Use Trash to Treasure?</h2>
-          <p>Less guessing. More value. A cleaner recycling journey.</p>
+          <div class="tt-subtitle">Less guessing. More value. A cleaner recycling journey.</div>
         </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        <div class="tt-benefits">
-          <div class="tt-benefit">
-            <div class="tt-icon">💰</div>
-            <h3>Make Money</h3>
-            <p>Find out what your unwanted materials may be worth.</p>
-          </div>
-          <div class="tt-benefit">
-            <div class="tt-icon">🛡️</div>
-            <h3>Trusted Buyers</h3>
-            <p>See dealers that have been verified before recommendation.</p>
-          </div>
-          <div class="tt-benefit">
-            <div class="tt-icon">📍</div>
-            <h3>Nearby & Convenient</h3>
-            <p>Our next upgrade will make buyer matching location-aware.</p>
-          </div>
-          <div class="tt-benefit">
-            <div class="tt-icon">🌍</div>
-            <h3>Better for the Planet</h3>
-            <p>Keep useful materials in circulation instead of throwing them away.</p>
-          </div>
-        </div>
+    bcols = st.columns(4, gap="small")
+    benefits = [
+        ("💰", "Make Money", "Find out what your unwanted materials may be worth."),
+        ("🛡️", "Trusted Buyers", "See dealers that have been verified before recommendation."),
+        ("📍", "Nearby & Convenient", "Our next upgrade will make buyer matching location-aware."),
+        ("🌍", "Better for the Planet", "Keep useful materials in circulation instead of throwing them away."),
+    ]
+    for col, (icon, title, desc) in zip(bcols, benefits):
+        with col:
+            st.markdown(
+                f"""
+                <div class="tt-benefit">
+                  <div class="tt-benefit-icon">{icon}</div>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-        <div class="tt-impact">
-          <div>
-            <h2>Small Action.<br>Big Impact.</h2>
+    st.markdown(
+        """
+        <div class="tt-wrap">
+          <div class="tt-impact">
+            <h2>Small Action. Big Impact.</h2>
             <p>
               Every item that finds a better destination is one less useful
               material going straight to the waste stream.
             </p>
-            <div class="tt-testimonial">
-              ⭐⭐⭐⭐⭐<br>
-              <b>“My old scrap may be worth more than I thought.”</b><br>
-              <span style="color:#68756e">A future customer story from Mianwali.</span>
-            </div>
-          </div>
-          <div class="tt-stats">
-            <div class="tt-stat"><strong>AI</strong><span>Material Identification</span></div>
-            <div class="tt-stat"><strong>Rs.</strong><span>Estimated Value</span></div>
-            <div class="tt-stat"><strong>📍</strong><span>Local Buyer Matching</span></div>
           </div>
         </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        <div class="tt-footer">
-          <div><b>♻️ Trash to Treasure</b><br>See it. Identify it. Value it. Sell it.</div>
-          <div>Privacy • Terms • Contact</div>
-          <div>© Trash to Treasure</div>
-        </div>
+    s1, s2, s3 = st.columns(3)
+    with s1:
+        st.markdown(
+            '<div class="tt-stat"><strong>AI</strong><span>Material Identification</span></div>',
+            unsafe_allow_html=True,
+        )
+    with s2:
+        st.markdown(
+            '<div class="tt-stat"><strong>Rs.</strong><span>Estimated Value</span></div>',
+            unsafe_allow_html=True,
+        )
+    with s3:
+        st.markdown(
+            '<div class="tt-stat"><strong>📍</strong><span>Local Buyer Matching</span></div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        """
+        <div class="tt-wrap">
+          <div class="tt-quote">
+            ⭐⭐⭐⭐⭐<br>
+            <b>“My old scrap may be worth more than I thought.”</b><br>
+            <span style="color:#68756e">A future customer story from Mianwali.</span>
+          </div>
+          <div class="tt-footer">
+            <div><b>♻️ Trash to Treasure</b><br>See it. Identify it. Value it. Sell it.</div>
+            <div>Privacy • Terms • Contact</div>
+            <div>© Trash to Treasure</div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
