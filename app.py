@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import json
 import urllib.parse
 from datetime import datetime, timezone
@@ -26,6 +27,8 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+        .landing-visual-caption{text-align:center;color:#168447;font-weight:750;font-size:.82rem;margin:8px 0;}
+        
     .stApp {
         background: #f6faf7;
     }
@@ -318,232 +321,57 @@ def save_record(
     supabase.table("scrap_records").insert(payload).execute()
 
 
+# Landing-page visual assets
+LANDING_ASSETS = Path(__file__).resolve().parent / "assets"
+STEP_TAKE_PICTURE = LANDING_ASSETS / "step_take_picture.gif"
+STEP_AI_IDENTIFIES = LANDING_ASSETS / "step_ai_identifies.gif"
+STEP_SEE_VALUE = LANDING_ASSETS / "step_see_value.gif"
+
 # ============================================================
-# SIMPLE, ATTRACTIVE PUBLIC LANDING PAGE
+# PUBLIC LANDING PAGE
 # ============================================================
 def landing_page():
-    # A deliberately simple design: Streamlit widgets handle every action,
-    # while HTML is used only for visual text/cards. This keeps the page
-    # attractive without making buttons unreliable.
     st.markdown(
         """
-        <style>
-        .simple-wrap {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-        .simple-hero {
-            padding: 42px 38px;
-            border-radius: 26px;
-            background: linear-gradient(135deg, #e9f7ed 0%, #f7fbf6 62%, #dff2e4 100%);
-            border: 1px solid #d8eadc;
-            text-align: center;
-            margin-bottom: 18px;
-        }
-        .simple-logo {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: #147a3d;
-            margin-bottom: 12px;
-        }
-        .simple-hero h1 {
-            color: #14231b;
-            font-size: clamp(2.5rem, 5vw, 4.2rem);
-            line-height: 1.05;
-            letter-spacing: -0.05em;
-            margin: 0 auto 14px;
-            max-width: 800px;
-        }
-        .simple-green { color: #168447; }
-        .simple-hero p {
-            color: #536159;
-            font-size: 1.08rem;
-            line-height: 1.6;
-            max-width: 680px;
-            margin: 0 auto;
-        }
-        .simple-trust {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 18px;
-            margin-top: 20px;
-            color: #3d4d43;
-            font-size: .84rem;
-            font-weight: 650;
-        }
-        .simple-section-title {
-            text-align: center;
-            color: #14231b;
-            font-size: 2rem;
-            letter-spacing: -.035em;
-            margin: 28px 0 5px;
-        }
-        .simple-section-sub {
-            text-align: center;
-            color: #718078;
-            margin-bottom: 18px;
-        }
-        .simple-card {
-            background: #ffffff;
-            border: 1px solid #e3eae4;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 5px 18px rgba(22, 70, 43, .07);
-        }
-        .simple-card-title {
-            color: #17251d;
-            font-size: 1.05rem;
-            font-weight: 800;
-            margin: 12px 14px 4px;
-        }
-        .simple-card-text {
-            color: #6b776f;
-            font-size: .86rem;
-            line-height: 1.45;
-            margin: 0 14px 16px;
-        }
-        .simple-note {
-            text-align: center;
-            color: #526158;
-            font-size: .9rem;
-            margin: 22px 0 8px;
-        }
-        .simple-login-title {
-            text-align: center;
-            color: #14231b;
-            font-size: 1.25rem;
-            font-weight: 750;
-            margin: 22px 0 8px;
-        }
-        .simple-footer {
-            text-align: center;
-            color: #7a857e;
-            font-size: .78rem;
-            padding: 22px 0 8px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        """
-        <div class="simple-wrap">
-          <div class="simple-hero">
-            <div class="simple-logo">♻️ TRASH TO TREASURE</div>
-            <h1>
-              Don't throw it away.<br>
-              <span class="simple-green">Find out what it's worth.</span>
-            </h1>
-            <p>
-              Take a picture of your scrap. We'll help identify the material,
-              estimate its value, and help you find a buyer.
-            </p>
-            <div class="simple-trust">
-              <span>🔒 Private</span>
-              <span>🤖 AI-Powered</span>
-              <span>💰 Value Estimate</span>
-              <span>♻️ Better for the Planet</span>
-            </div>
-          </div>
+        <div class="landing-nav">
+            <div class="brand">♻️ Trash to Treasure</div>
+            <div class="tagline">Your unwanted stuff may be worth something.</div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    start_col, login_col, signup_col = st.columns([1.35, .8, .95], gap="small")
-
-    with start_col:
-        if st.button(
-            "📸  Start Now — It's Free",
-            type="primary",
-            use_container_width=True,
-            key="landing_start",
-        ):
-            st.session_state.auth_mode = "login"
-            st.rerun()
-
-    with login_col:
-        if st.button(
-            "🔐  Login",
-            use_container_width=True,
-            key="landing_login",
-        ):
-            st.session_state.auth_mode = "login"
-            st.rerun()
-
-    with signup_col:
-        if st.button(
-            "📝  Create Account",
-            use_container_width=True,
-            key="landing_signup",
-        ):
-            st.session_state.auth_mode = "signup"
-            st.rerun()
-
-    st.markdown(
-        """
-        <div class="simple-wrap">
-          <div class="simple-section-title">How It Works</div>
-          <div class="simple-section-sub">
-            Three simple steps. That's it.
-          </div>
+        <div class="landing-hero">
+            <div class="eyebrow">SMART SCRAP • LOCAL VALUE • EASY SELLING</div>
+            <h1>Don't throw it away.<br>Find out what it's worth.</h1>
+            <p>Take a picture of old metal, paper, plastic, clothes, electronics or other unwanted things. Trash to Treasure helps identify it, estimate its value and connect you with a suitable buyer.</p>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """, unsafe_allow_html=True)
+    c1,c2=st.columns([1.55,1],gap="large")
+    with c1:
+        if st.button("📸 Start Now — It's Free",type="primary",use_container_width=True):
+            st.session_state.auth_mode="login"; st.rerun()
+        st.markdown("""
+        <div class="flow-strip">
+          <div><b>1</b><span>Take a picture</span></div><div><b>2</b><span>We identify it</span></div>
+          <div><b>3</b><span>Add the weight</span></div><div><b>4</b><span>See the value</span></div><div><b>5</b><span>Find a buyer</span></div>
+        </div>""",unsafe_allow_html=True)
+        v1,v2,v3=st.columns(3,gap="medium")
+        with v1:
+            if STEP_TAKE_PICTURE.exists():
+                st.image(str(STEP_TAKE_PICTURE),use_container_width=True)
+        with v2:
+            if STEP_AI_IDENTIFIES.exists():
+                st.image(str(STEP_AI_IDENTIFIES),use_container_width=True)
+        with v3:
+            if STEP_SEE_VALUE.exists():
+                st.image(str(STEP_SEE_VALUE),use_container_width=True)
 
-    cards = [
-        (
-            "1 • Take a Picture",
-            "Show us what you want to sell.",
-            "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80",
-        ),
-        (
-            "2 • We Identify It",
-            "AI helps identify the material.",
-            "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80",
-        ),
-        (
-            "3 • See Its Value",
-            "Add the weight and get an estimate.",
-            "https://images.unsplash.com/photo-1559526324-593bc073d938?w=800&q=80",
-        ),
-    ]
-
-    cols = st.columns(3, gap="medium")
-    for col, (title, description, image_url) in zip(cols, cards):
-        with col:
-            st.markdown('<div class="simple-card">', unsafe_allow_html=True)
-            st.image(image_url, use_container_width=True)
-            st.markdown(
-                f"""
-                <div class="simple-card-title">{title}</div>
-                <div class="simple-card-text">{description}</div>
-                """,
-                unsafe_allow_html=True,
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown(
-        """
-        <div class="simple-wrap">
-          <div class="simple-note">
-            💡 <b>You decide what happens next.</b>
-            Sell it, recycle it, or give it another life.
-          </div>
-          <div class="simple-login-title">
-            Ready to turn your scrap into treasure?
-          </div>
-          <div class="simple-footer">
-            ♻️ Trash to Treasure &nbsp;•&nbsp; See it. Identify it. Value it. Sell it.
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
+        b1,b2,b3=st.columns(3)
+        cards=[("💰","Know the value","Get an estimated value based on your measured weight and the latest rate stored in the app."),("📍","Find a buyer","See relevant verified local dealers and contact them directly."),("♻️","Give it another life","Turn unwanted materials into something useful instead of sending them to waste.")]
+        for col,(icon,title,desc) in zip((b1,b2,b3),cards):
+            with col: st.markdown(f'<div class="benefit-card"><div class="benefit-icon">{icon}</div><h3>{title}</h3><p>{desc}</p></div>',unsafe_allow_html=True)
+    with c2:
+        st.markdown('<div class="auth-card"><h2>Welcome 👋</h2><p class="muted">Create a free account to keep your scans and scrap history private to you.</p></div>',unsafe_allow_html=True)
+        if st.button("🔐 Sign In",use_container_width=True): st.session_state.auth_mode="login"; st.rerun()
+        if st.button("📝 Create Free Account",use_container_width=True): st.session_state.auth_mode="signup"; st.rerun()
+        st.markdown('<div class="mini-card"><b>What can we help identify?</b><p>🔩 Metals &nbsp; 📦 Paper &nbsp; 🧴 Plastic</p><p>👕 Clothes &nbsp; 💻 E-Waste &nbsp; 🔋 Batteries</p></div>',unsafe_allow_html=True)
 
 # ============================================================
 # AUTHENTICATION
