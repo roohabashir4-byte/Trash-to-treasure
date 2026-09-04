@@ -206,7 +206,7 @@ Condition must be one of: Clean, Mixed, Dirty, Damaged, Unknown.
 """
 
     response = client.models.generate_content(
-     model="gemini-3.6-flash",
+        model="gemini-2.5-flash",
         contents=[image, prompt],
     )
 
