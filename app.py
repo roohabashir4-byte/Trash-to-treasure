@@ -74,6 +74,19 @@ st.markdown(
         color: #087f5b;
         font-weight: 700;
     }
+    .landing-nav { display:flex; justify-content:space-between; align-items:center; padding:.8rem 0 1rem; gap:1rem; }
+    .brand { font-size:1.35rem; font-weight:800; color:#087f5b; }
+    .tagline { color:#66736d; font-size:.95rem; }
+    .landing-hero { padding:3.2rem 3rem; border-radius:28px; background:linear-gradient(135deg,#087f5b,#20a46b); color:white; margin:.5rem 0 1.5rem; }
+    .landing-hero h1 { font-size:3.5rem; line-height:1.08; margin:.5rem 0 1rem; }
+    .landing-hero p { max-width:760px; font-size:1.15rem; line-height:1.65; margin:0; }
+    .eyebrow { font-size:.78rem; font-weight:800; letter-spacing:.12em; opacity:.9; }
+    .flow-strip { display:flex; justify-content:space-between; gap:.5rem; padding:1rem; margin:1rem 0 1.3rem; border-radius:18px; background:white; border:1px solid #e4ebe7; }
+    .flow-strip div { display:flex; align-items:center; gap:.45rem; font-size:.85rem; }
+    .flow-strip b { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; border-radius:50%; background:#e7f7ef; color:#087f5b; }
+    .benefit-card,.auth-card,.mini-card { padding:1.25rem; border-radius:20px; background:white; border:1px solid #e4ebe7; margin:.5rem 0; box-shadow:0 4px 16px rgba(0,0,0,.04); }
+    .benefit-card h3 { margin:.4rem 0; } .benefit-card p,.auth-card p,.mini-card p { color:#66736d; line-height:1.5; } .benefit-icon { font-size:1.8rem; } .auth-card { padding:1.6rem; }
+    @media (max-width:800px) { .landing-hero{padding:2rem 1.4rem;} .landing-hero h1{font-size:2.3rem;} .flow-strip{flex-direction:column;} .landing-nav{flex-direction:column;align-items:flex-start;} }
     </style>
     """,
     unsafe_allow_html=True,
@@ -111,6 +124,9 @@ if "session" not in st.session_state:
 
 if "analysis" not in st.session_state:
     st.session_state.analysis = None
+
+if "auth_mode" not in st.session_state:
+    st.session_state.auth_mode = None
 
 
 # ============================================================
@@ -206,7 +222,7 @@ Condition must be one of: Clean, Mixed, Dirty, Damaged, Unknown.
 """
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.6-flash",
         contents=[image, prompt],
     )
 
@@ -303,103 +319,83 @@ def save_record(
 
 
 # ============================================================
-# AUTHENTICATION
+# PUBLIC LANDING PAGE
 # ============================================================
-def auth_page():
+def landing_page():
     st.markdown(
         """
-        <div class="hero">
-            <h1>♻️ Trash to Treasure</h1>
-            <p>See it. Identify it. Value it. Sell it.</p>
+        <div class="landing-nav">
+            <div class="brand">♻️ Trash to Treasure</div>
+            <div class="tagline">Your unwanted stuff may be worth something.</div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        <div class="landing-hero">
+            <div class="eyebrow">SMART SCRAP • LOCAL VALUE • EASY SELLING</div>
+            <h1>Don't throw it away.<br>Find out what it's worth.</h1>
+            <p>Take a picture of old metal, paper, plastic, clothes, electronics or other unwanted things. Trash to Treasure helps identify it, estimate its value and connect you with a suitable buyer.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    c1,c2=st.columns([1.55,1],gap="large")
+    with c1:
+        if st.button("📸 Start Now — It's Free",type="primary",use_container_width=True):
+            st.session_state.auth_mode="login"; st.rerun()
+        st.markdown("""
+        <div class="flow-strip">
+          <div><b>1</b><span>Take a picture</span></div><div><b>2</b><span>We identify it</span></div>
+          <div><b>3</b><span>Add the weight</span></div><div><b>4</b><span>See the value</span></div><div><b>5</b><span>Find a buyer</span></div>
+        </div>""",unsafe_allow_html=True)
+        b1,b2,b3=st.columns(3)
+        cards=[("💰","Know the value","Get an estimated value based on your measured weight and the latest rate stored in the app."),("📍","Find a buyer","See relevant verified local dealers and contact them directly."),("♻️","Give it another life","Turn unwanted materials into something useful instead of sending them to waste.")]
+        for col,(icon,title,desc) in zip((b1,b2,b3),cards):
+            with col: st.markdown(f'<div class="benefit-card"><div class="benefit-icon">{icon}</div><h3>{title}</h3><p>{desc}</p></div>',unsafe_allow_html=True)
+    with c2:
+        st.markdown('<div class="auth-card"><h2>Welcome 👋</h2><p class="muted">Create a free account to keep your scans and scrap history private to you.</p></div>',unsafe_allow_html=True)
+        if st.button("🔐 Sign In",use_container_width=True): st.session_state.auth_mode="login"; st.rerun()
+        if st.button("📝 Create Free Account",use_container_width=True): st.session_state.auth_mode="signup"; st.rerun()
+        st.markdown('<div class="mini-card"><b>What can we help identify?</b><p>🔩 Metals &nbsp; 📦 Paper &nbsp; 🧴 Plastic</p><p>👕 Clothes &nbsp; 💻 E-Waste &nbsp; 🔋 Batteries</p></div>',unsafe_allow_html=True)
 
-    tab1, tab2 = st.tabs(["🔐 Login", "📝 Create Account"])
-
+# ============================================================
+# AUTHENTICATION
+# ============================================================
+def auth_page(mode="login"):
+    st.markdown("""
+    <div class="hero"><h1>♻️ Trash to Treasure</h1><p>See it. Identify it. Value it. Sell it.</p></div>
+    """,unsafe_allow_html=True)
+    if st.button("← Back to Introduction"):
+        st.session_state.auth_mode=None; st.rerun()
+    tab1,tab2=st.tabs(["🔐 Sign In","📝 Create Account"])
     with tab1:
         with st.form("login_form"):
-            email = st.text_input("Email")
-            password = st.text_input("Password", type="password")
-            submitted = st.form_submit_button(
-                "Login",
-                type="primary",
-                use_container_width=True,
-            )
-
+            email=st.text_input("Email"); password=st.text_input("Password",type="password")
+            submitted=st.form_submit_button("Sign In",type="primary",use_container_width=True)
         if submitted:
             try:
-                response = supabase.auth.sign_in_with_password(
-                    {"email": email.strip(), "password": password}
-                )
-                st.session_state.session = response.session
-                st.session_state.user = response.user
-                st.success("Login successful.")
-                st.rerun()
-            except Exception as exc:
-                st.error(f"Login failed: {exc}")
-
+                response=supabase.auth.sign_in_with_password({"email":email.strip(),"password":password})
+                st.session_state.session=response.session; st.session_state.user=response.user; st.session_state.auth_mode=None; st.success("Login successful."); st.rerun()
+            except Exception as exc: st.error(f"Login failed: {exc}")
     with tab2:
         with st.form("signup_form"):
-            name = st.text_input("Name")
-            email = st.text_input("Email", key="signup_email")
-            password = st.text_input(
-                "Password",
-                type="password",
-                key="signup_password",
-            )
-            confirm = st.text_input(
-                "Confirm Password",
-                type="password",
-            )
-            submitted = st.form_submit_button(
-                "Create Account",
-                use_container_width=True,
-            )
-
+            name=st.text_input("Name"); email=st.text_input("Email",key="signup_email"); password=st.text_input("Password",type="password",key="signup_password"); confirm=st.text_input("Confirm Password",type="password")
+            submitted=st.form_submit_button("Create Account",use_container_width=True)
         if submitted:
-            if not name.strip():
-                st.error("Please enter your name.")
-            elif password != confirm:
-                st.error("Passwords do not match.")
-            elif len(password) < 8:
-                st.error("Password must contain at least 8 characters.")
+            if not name.strip(): st.error("Please enter your name.")
+            elif password!=confirm: st.error("Passwords do not match.")
+            elif len(password)<8: st.error("Password must contain at least 8 characters.")
             else:
                 try:
-                    response = supabase.auth.sign_up(
-                        {
-                            "email": email.strip(),
-                            "password": password,
-                            "options": {
-                                "data": {
-                                    "full_name": name.strip()
-                                }
-                            },
-                        }
-                    )
-
+                    response=supabase.auth.sign_up({"email":email.strip(),"password":password,"options":{"data":{"full_name":name.strip()}}})
                     if response.session:
-                        st.session_state.session = response.session
-                        st.session_state.user = response.user
-                        st.success("Account created.")
-                        st.rerun()
-                    else:
-                        st.success(
-                            "Account created. Check your email to confirm "
-                            "your account, then log in."
-                        )
-                except Exception as exc:
-                    st.error(f"Sign-up failed: {exc}")
-
+                        st.session_state.session=response.session; st.session_state.user=response.user; st.session_state.auth_mode=None; st.success("Account created."); st.rerun()
+                    else: st.success("Account created. Check your email to confirm your account, then log in.")
+                except Exception as exc: st.error(f"Sign-up failed: {exc}")
 
 # ============================================================
 # STOP HERE IF NOT LOGGED IN
 # ============================================================
 if not current_user():
-    auth_page()
+    if "auth_mode" not in st.session_state: st.session_state.auth_mode=None
+    if st.session_state.auth_mode: auth_page(st.session_state.auth_mode)
+    else: landing_page()
     st.stop()
-
 
 # ============================================================
 # SIDEBAR
