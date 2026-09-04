@@ -319,39 +319,414 @@ def save_record(
 
 
 # ============================================================
-# PUBLIC LANDING PAGE
+# PROFESSIONAL PUBLIC LANDING PAGE
 # ============================================================
 def landing_page():
+    # Visuals are loaded from Unsplash's image CDN. They are only used on
+    # the public landing page; the app's data/backend remains unchanged.
+    step_images = [
+        "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=900&q=80",
+        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=900&q=80",
+        "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=900&q=80",
+        "https://images.unsplash.com/photo-1559526324-593bc073d938?w=900&q=80",
+        "https://images.unsplash.com/photo-1528323273322-d81458248d40?w=900&q=80",
+    ]
+
     st.markdown(
         """
-        <div class="landing-nav">
-            <div class="brand">♻️ Trash to Treasure</div>
-            <div class="tagline">Your unwanted stuff may be worth something.</div>
+        <style>
+        /* Landing-page-only styling */
+        .tt-shell {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+        .tt-nav {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding: .6rem 0 1rem;
+            border-bottom:1px solid #e9eee9;
+            margin-bottom:1rem;
+        }
+        .tt-brand {
+            display:flex;
+            align-items:center;
+            gap:.55rem;
+            font-size:1.35rem;
+            font-weight:800;
+            letter-spacing:-.03em;
+            color:#13231b;
+        }
+        .tt-brand span { color:#168447; }
+        .tt-navlinks {
+            display:flex;
+            gap:1.6rem;
+            color:#33423a;
+            font-size:.92rem;
+            font-weight:600;
+        }
+        .tt-hero {
+            min-height:510px;
+            border-radius:30px;
+            overflow:hidden;
+            position:relative;
+            background:
+                linear-gradient(90deg, rgba(248,252,248,.98) 0%,
+                rgba(248,252,248,.94) 48%, rgba(248,252,248,.28) 100%),
+                url("https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=1800&q=85")
+                center/cover;
+            display:flex;
+            align-items:center;
+            padding:3.8rem;
+            box-shadow:0 14px 40px rgba(22,70,43,.10);
+        }
+        .tt-hero-copy { max-width:650px; }
+        .tt-eyebrow {
+            display:inline-block;
+            padding:.4rem .75rem;
+            border-radius:999px;
+            background:#e6f5e9;
+            color:#167a42;
+            font-size:.75rem;
+            font-weight:800;
+            letter-spacing:.08em;
+        }
+        .tt-hero h1 {
+            font-size:clamp(2.7rem,5vw,4.6rem);
+            line-height:1.02;
+            letter-spacing:-.055em;
+            color:#13231b;
+            margin:1rem 0;
+        }
+        .tt-hero h1 .green { color:#168447; }
+        .tt-hero p {
+            font-size:1.14rem;
+            line-height:1.65;
+            color:#3f4d45;
+            max-width:610px;
+            margin-bottom:1.4rem;
+        }
+        .tt-phone {
+            position:absolute;
+            right:6%;
+            bottom:0;
+            width:280px;
+            background:#101511;
+            border:7px solid #111;
+            border-radius:34px 34px 0 0;
+            padding:11px;
+            box-shadow:0 22px 45px rgba(0,0,0,.22);
+            transform:rotate(2deg);
+        }
+        .tt-phone-screen {
+            background:white;
+            border-radius:22px;
+            overflow:hidden;
+            padding-bottom:12px;
+        }
+        .tt-phone-screen img {
+            width:100%;
+            height:165px;
+            object-fit:cover;
+        }
+        .tt-phone-body { padding:10px 13px; }
+        .tt-phone-body h3 { margin:0 0 5px; font-size:1.1rem; color:#17231c; }
+        .tt-price { color:#128344; font-size:1.25rem; font-weight:800; }
+        .tt-phone-btn {
+            margin-top:10px;
+            padding:9px;
+            border-radius:10px;
+            text-align:center;
+            background:#168447;
+            color:white;
+            font-weight:700;
+            font-size:.75rem;
+        }
+        .tt-trust {
+            display:flex;
+            gap:1.4rem;
+            flex-wrap:wrap;
+            margin-top:1rem;
+            color:#3f4d45;
+            font-size:.85rem;
+            font-weight:600;
+        }
+        .tt-section {
+            padding:3.5rem 0 .8rem;
+        }
+        .tt-section-head {
+            text-align:center;
+            margin-bottom:2rem;
+        }
+        .tt-section-head h2 {
+            font-size:2.25rem;
+            letter-spacing:-.04em;
+            color:#13231b;
+            margin:.35rem 0;
+        }
+        .tt-section-head p { color:#68756e; }
+        .tt-steps {
+            display:grid;
+            grid-template-columns:repeat(5,1fr);
+            gap:1rem;
+        }
+        .tt-step {
+            background:white;
+            border:1px solid #e3eae4;
+            border-radius:22px;
+            overflow:hidden;
+            box-shadow:0 5px 20px rgba(20,60,35,.06);
+        }
+        .tt-step-img {
+            width:100%;
+            height:155px;
+            object-fit:cover;
+            display:block;
+        }
+        .tt-step-body { padding:1rem; }
+        .tt-num {
+            width:30px;
+            height:30px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#168447;
+            color:white;
+            font-weight:800;
+            margin-bottom:.65rem;
+        }
+        .tt-step h3 { margin:0 0 .4rem; color:#17231c; font-size:1.05rem; }
+        .tt-step p { margin:0; color:#68756e; line-height:1.45; font-size:.88rem; }
+        .tt-benefits {
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:1rem;
+        }
+        .tt-benefit {
+            min-height:180px;
+            padding:1.35rem;
+            border-radius:22px;
+            background:#f3f8f1;
+            border:1px solid #e0eadf;
+        }
+        .tt-icon { font-size:2rem; }
+        .tt-benefit h3 { color:#17231c; margin:.45rem 0; }
+        .tt-benefit p { color:#68756e; line-height:1.5; }
+        .tt-impact {
+            margin-top:3rem;
+            border-radius:28px;
+            padding:3rem;
+            background:linear-gradient(135deg,#0d6337,#168447);
+            color:white;
+            display:grid;
+            grid-template-columns:1.3fr 1fr;
+            gap:2rem;
+            align-items:center;
+        }
+        .tt-impact h2 {
+            font-size:2.4rem;
+            margin:0 0 .7rem;
+        }
+        .tt-impact p { opacity:.9; line-height:1.6; }
+        .tt-stats {
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:1rem;
+            text-align:center;
+        }
+        .tt-stat strong { display:block; font-size:2rem; }
+        .tt-stat span { opacity:.85; font-size:.8rem; }
+        .tt-testimonial {
+            background:white;
+            color:#26342c;
+            padding:1.3rem;
+            border-radius:20px;
+            margin-top:1.3rem;
+        }
+        .tt-footer {
+            padding:2rem 0 1rem;
+            color:#6b776f;
+            display:flex;
+            justify-content:space-between;
+            gap:1rem;
+            font-size:.85rem;
+        }
+        @media (max-width: 950px) {
+            .tt-navlinks { display:none; }
+            .tt-hero { padding:2rem; min-height:620px; }
+            .tt-phone { opacity:.28; right:3%; }
+            .tt-steps { grid-template-columns:repeat(2,1fr); }
+            .tt-benefits { grid-template-columns:repeat(2,1fr); }
+            .tt-impact { grid-template-columns:1fr; }
+        }
+        @media (max-width: 600px) {
+            .tt-hero { padding:1.5rem; }
+            .tt-hero h1 { font-size:2.65rem; }
+            .tt-phone { display:none; }
+            .tt-steps, .tt-benefits { grid-template-columns:1fr; }
+            .tt-stats { grid-template-columns:1fr; }
+            .tt-footer { flex-direction:column; }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <div class="tt-shell">
+          <div class="tt-nav">
+            <div class="tt-brand">♻️ Trash to <span>Treasure</span></div>
+            <div class="tt-navlinks">
+              <span>How It Works</span>
+              <span>Why Use Us</span>
+              <span>For Dealers</span>
+              <span>FAQ</span>
+            </div>
+          </div>
+
+          <div class="tt-hero">
+            <div class="tt-hero-copy">
+              <div class="tt-eyebrow">SMART SCRAP • LOCAL VALUE • EASY SELLING</div>
+              <h1>Don't throw it away.<br><span class="green">Find out what it's worth.</span></h1>
+              <p>
+                Identify your scrap, get an estimated value, and connect with
+                verified buyers near you — all from one simple app.
+              </p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    cta1, cta2 = st.columns([1, .55])
+    with cta1:
+        if st.button("📷  Start Now — It's Free", type="primary",
+                     use_container_width=True, key="landing_start"):
+            st.session_state.auth_mode = "login"
+            st.rerun()
+    with cta2:
+        if st.button("♙  Login", use_container_width=True, key="landing_login"):
+            st.session_state.auth_mode = "login"
+            st.rerun()
+
+    st.markdown(
+        """
+              <div class="tt-trust">
+                <span>🛡️ Safe & Private</span>
+                <span>📍 Local Buyers</span>
+                <span>✓ Verified Dealers</span>
+              </div>
+            </div>
+
+            <div class="tt-phone">
+              <div class="tt-phone-screen">
+                <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=700&q=80">
+                <div class="tt-phone-body">
+                  <h3>Copper</h3>
+                  <div style="font-size:.7rem;color:#718078">Estimated value</div>
+                  <div class="tt-price">Rs. 3,250</div>
+                  <div style="font-size:.72rem;color:#718078;margin-top:7px">5 kg × current rate</div>
+                  <div class="tt-phone-btn">Find Buyers Near Me</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="landing-hero">
-            <div class="eyebrow">SMART SCRAP • LOCAL VALUE • EASY SELLING</div>
-            <h1>Don't throw it away.<br>Find out what it's worth.</h1>
-            <p>Take a picture of old metal, paper, plastic, clothes, electronics or other unwanted things. Trash to Treasure helps identify it, estimate its value and connect you with a suitable buyer.</p>
+
+        <div class="tt-shell tt-section">
+          <div class="tt-section-head">
+            <div style="color:#168447;font-weight:800">🌿 SIMPLE FROM START TO SALE</div>
+            <h2>How It Works</h2>
+            <p>Five simple steps to turn unwanted stuff into treasure.</p>
+          </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    steps = [
+        ("Take a Picture", "Snap a clear photo of the item you want to sell.", step_images[0]),
+        ("We Identify It", "Our AI identifies the most likely material.", step_images[1]),
+        ("Add Weight", "Enter the measured weight for a better estimate.", step_images[2]),
+        ("See Your Value", "Get an estimated value using the available rate.", step_images[3]),
+        ("Find a Buyer", "Connect with a suitable verified local dealer.", step_images[4]),
+    ]
+
+    step_html = '<div class="tt-steps">'
+    for i, (title, desc, img) in enumerate(steps, 1):
+        step_html += f"""
+        <div class="tt-step">
+          <img class="tt-step-img" src="{img}" alt="{title}">
+          <div class="tt-step-body">
+            <div class="tt-num">{i}</div>
+            <h3>{title}</h3>
+            <p>{desc}</p>
+          </div>
         </div>
-        """, unsafe_allow_html=True)
-    c1,c2=st.columns([1.55,1],gap="large")
-    with c1:
-        if st.button("📸 Start Now — It's Free",type="primary",use_container_width=True):
-            st.session_state.auth_mode="login"; st.rerun()
-        st.markdown("""
-        <div class="flow-strip">
-          <div><b>1</b><span>Take a picture</span></div><div><b>2</b><span>We identify it</span></div>
-          <div><b>3</b><span>Add the weight</span></div><div><b>4</b><span>See the value</span></div><div><b>5</b><span>Find a buyer</span></div>
-        </div>""",unsafe_allow_html=True)
-        b1,b2,b3=st.columns(3)
-        cards=[("💰","Know the value","Get an estimated value based on your measured weight and the latest rate stored in the app."),("📍","Find a buyer","See relevant verified local dealers and contact them directly."),("♻️","Give it another life","Turn unwanted materials into something useful instead of sending them to waste.")]
-        for col,(icon,title,desc) in zip((b1,b2,b3),cards):
-            with col: st.markdown(f'<div class="benefit-card"><div class="benefit-icon">{icon}</div><h3>{title}</h3><p>{desc}</p></div>',unsafe_allow_html=True)
-    with c2:
-        st.markdown('<div class="auth-card"><h2>Welcome 👋</h2><p class="muted">Create a free account to keep your scans and scrap history private to you.</p></div>',unsafe_allow_html=True)
-        if st.button("🔐 Sign In",use_container_width=True): st.session_state.auth_mode="login"; st.rerun()
-        if st.button("📝 Create Free Account",use_container_width=True): st.session_state.auth_mode="signup"; st.rerun()
-        st.markdown('<div class="mini-card"><b>What can we help identify?</b><p>🔩 Metals &nbsp; 📦 Paper &nbsp; 🧴 Plastic</p><p>👕 Clothes &nbsp; 💻 E-Waste &nbsp; 🔋 Batteries</p></div>',unsafe_allow_html=True)
+        """
+    step_html += "</div>"
+    st.markdown(step_html, unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="tt-section-head" style="margin-top:3.5rem">
+          <div style="color:#168447;font-weight:800">♻️ MADE FOR REAL PEOPLE</div>
+          <h2>Why Use Trash to Treasure?</h2>
+          <p>Less guessing. More value. A cleaner recycling journey.</p>
+        </div>
+
+        <div class="tt-benefits">
+          <div class="tt-benefit">
+            <div class="tt-icon">💰</div>
+            <h3>Make Money</h3>
+            <p>Find out what your unwanted materials may be worth.</p>
+          </div>
+          <div class="tt-benefit">
+            <div class="tt-icon">🛡️</div>
+            <h3>Trusted Buyers</h3>
+            <p>See dealers that have been verified before recommendation.</p>
+          </div>
+          <div class="tt-benefit">
+            <div class="tt-icon">📍</div>
+            <h3>Nearby & Convenient</h3>
+            <p>Our next upgrade will make buyer matching location-aware.</p>
+          </div>
+          <div class="tt-benefit">
+            <div class="tt-icon">🌍</div>
+            <h3>Better for the Planet</h3>
+            <p>Keep useful materials in circulation instead of throwing them away.</p>
+          </div>
+        </div>
+
+        <div class="tt-impact">
+          <div>
+            <h2>Small Action.<br>Big Impact.</h2>
+            <p>
+              Every item that finds a better destination is one less useful
+              material going straight to the waste stream.
+            </p>
+            <div class="tt-testimonial">
+              ⭐⭐⭐⭐⭐<br>
+              <b>“My old scrap may be worth more than I thought.”</b><br>
+              <span style="color:#68756e">A future customer story from Mianwali.</span>
+            </div>
+          </div>
+          <div class="tt-stats">
+            <div class="tt-stat"><strong>AI</strong><span>Material Identification</span></div>
+            <div class="tt-stat"><strong>Rs.</strong><span>Estimated Value</span></div>
+            <div class="tt-stat"><strong>📍</strong><span>Local Buyer Matching</span></div>
+          </div>
+        </div>
+
+        <div class="tt-footer">
+          <div><b>♻️ Trash to Treasure</b><br>See it. Identify it. Value it. Sell it.</div>
+          <div>Privacy • Terms • Contact</div>
+          <div>© Trash to Treasure</div>
+        </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 # ============================================================
 # AUTHENTICATION
